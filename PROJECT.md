@@ -1,7 +1,5 @@
 # ArgosHound
 
-**Status:** Hackathon MVP
-
 **Tech Stack:** React + Vite · ASP.NET Core · Azure OpenAI · SQLite (Azure Cosmos DB later)
 
 ---
@@ -10,9 +8,9 @@
 
 ArgosHound is an AI talent agent for builders.
 
-Instead of searching for jobs or generating generic leads, ArgosHound continuously scans online communities, recognizes hidden opportunities, and recommends the highest-value actions based on a builder's skills, products, interests, and historical success.
+Instead of searching for jobs or generating generic leads, ArgosHound continuously scans online communities, recognizes hidden opportunities, and recommends the highest value actions based on a builder's skills, products, interests, and historical success.
 
-The long-term goal is to become an AI representative that works on behalf of a builder—finding customers, discovering opportunities, and learning how to make increasingly better recommendations over time.
+The long-term goal is to become an AI representative that works on behalf of a builder: finding customers, discovering opportunities, and learning how to make increasingly better recommendations over time.
 
 ---
 
@@ -50,7 +48,7 @@ Everything in ArgosHound revolves around three connected capabilities powered by
 
 ### Purpose
 
-Identify conversations where an existing product already solves someone's problem.
+Identify conversations where the builder has an existing product that already solves someone's problem.
 
 Example:
 
@@ -132,7 +130,7 @@ Output:
 
 ## Feature 3 — Continuous Learning
 
-This is the long-term differentiator.
+This is the long term differentiator.
 
 ArgosHound should continuously learn what creates successful outcomes for each individual builder.
 
@@ -189,9 +187,9 @@ Internet Discussion
 Recognize Pain Point
         │
         ▼
-Does an existing product solve it?
+Does the builder have an existing product that solves it?
         │
-   Yes ───────► Product Opportunity
+   Yes ───────► Customer Opportunity
         │
         No
         │
@@ -418,7 +416,7 @@ Every opportunity card should clearly communicate:
 
 # Out of Scope
 
-Do NOT build during the hackathon:
+For now:
 
 - Authentication
 - Payments
