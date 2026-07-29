@@ -39,9 +39,9 @@ stable IDs and URLs.
 - [x] Add a repository `.gitignore`
 - [x] Add `.env.example` files without credentials
 - [x] Configure frontend and backend dependencies
-- [ ] Add a backend health endpoint
-- [ ] Confirm the frontend can call the backend
-- [ ] Document required environment-variable names
+- [x] Add a backend health endpoint
+- [x] Confirm the frontend can call the backend
+- [x] Document required environment-variable names
 
 ### 2. Builder and product fixtures
 
