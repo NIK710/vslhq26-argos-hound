@@ -1,483 +1,302 @@
 # ArgosHound
 
-**Tech Stack:** React + Vite · ASP.NET Core · Azure OpenAI · SQLite (Azure Cosmos DB later)
+**Status:** Hackathon MVP
 
----
+**Product:** A personalized opportunity scout for builders
 
-# Vision
+**Initial stack:** React + Vite, ASP.NET Core, Microsoft Foundry, Azure OpenAI, SQLite
 
-ArgosHound is an AI talent agent for builders.
+## Vision
 
-Instead of searching for jobs or generating generic leads, ArgosHound continuously scans online communities, recognizes hidden opportunities, and recommends the highest value actions based on a builder's skills, products, interests, and historical success.
+AI has made building software easier, but many builders have products with few or no
+users. At the same time, people describe unmet needs every day in public online
+communities.
 
-The long-term goal is to become an AI representative that works on behalf of a builder: finding customers, discovering opportunities, and learning how to make increasingly better recommendations over time.
+ArgosHound connects those two sides. It scouts public discussions, identifies credible
+problems, and recommends opportunities personalized to one builder's products, skills,
+interests, goals, and previous outcomes.
 
----
+ArgosHound is not a marketplace that compares products from unrelated builders. Each
+workspace represents one builder and the products and capabilities that builder owns.
 
-# Inspiration
+## Product Principles
 
-The name **ArgosHound** comes from Argos in *The Odyssey*.
+- Find evidence before proposing an opportunity.
+- Personalize every recommendation to the builder.
+- Explain why an opportunity is relevant and cite its source.
+- Treat model output as a recommendation, not a fact.
+- Require human approval before any comment, message, or other external action.
+- Track campaigns and outcomes, not people.
+- Learn through transparent scoring before introducing complex machine learning.
+- Collect and retain only the source data required to support the opportunity.
 
-Argos was the only one who recognized Odysseus despite his disguise.
+## The Two Opportunity Funnels
 
-Likewise, ArgosHound recognizes opportunities hidden inside conversations that most people overlook.
+### 1. Product Opportunities
 
-The "Hound" represents relentlessly tracking opportunities across the internet.
-
----
-
-# Core Philosophy
-
-Most people don't explicitly ask for products, employees, founders, or collaborators.
-
-Instead, they describe problems.
-
-ArgosHound's job is to understand those problems and determine whether they represent an opportunity for the builder.
-
-Every discussion is treated as a potential opportunity.
-
----
-
-# The Three Core Features
-
-Everything in ArgosHound revolves around three connected capabilities powered by a shared Builder Profile.
-
----
-
-## Feature 1 — Product Opportunity Discovery
-
-### Purpose
-
-Identify conversations where the builder has an existing product that already solves someone's problem.
+ArgosHound finds public discussions where an existing builder-owned product may solve
+an expressed or reasonably inferred problem.
 
 Example:
 
-A Reddit user writes:
+> Several students in a college subreddit discuss losing hours to doomscrolling.
 
-> "I spend way too much time scrolling YouTube."
+The builder owns a doomscroll-interruption extension. ArgosHound reports the thread,
+highlights the relevant subthread or comments, explains the match, and offers a
+campaign-specific link to the product.
 
-ArgosHound recognizes:
+A product opportunity can be:
 
-- Pain point
-- Matching product
-- Confidence
-- Reasoning
-- Suggested outreach
+- `DIRECT`: the product already addresses the problem.
+- `ADJACENT`: existing capabilities help in a related use case.
+- `SMALL_EXTENSION`: a small, realistic enhancement would make the product useful.
 
-Goal:
+If the fit is weak or would require a different product, ArgosHound should not recommend
+it as a product opportunity.
 
-Help builders naturally discover potential customers instead of relying on traditional outbound marketing.
+### 2. Builder Opportunities
 
-Questions ArgosHound asks:
+When no existing product is a good fit, ArgosHound asks whether solving the problem
+would be valuable for the builder personally.
 
-- What problem is this person experiencing?
-- Does one of my products solve it?
-- Should I engage?
-- Why is this a good opportunity?
+It considers:
 
-Output:
-
-- Product recommendation
-- Suggested action
-- Confidence score
-- Explanation
-
----
-
-## Feature 2 — Builder Opportunity Discovery
-
-Not every problem should become a customer.
-
-Sometimes the opportunity is for the builder themselves.
-
-ArgosHound should recognize opportunities including:
-
-- Freelance work
-- Consulting
-- Open source contributions
-- Startup ideas
-- Collaborations
-- Research
-- Community involvement
+- Current skills
+- Skills the builder wants to learn
+- Problem-area interests
+- Preferred opportunity types
+- Time and effort preferences
+- Optional geographic relevance
+- Previous choices and outcomes
 
 Example:
 
-A founder posts:
+> A local chess club is struggling with event scheduling, attendance, pairings, and
+> volunteer communication.
 
-> "Looking for someone experienced with React and Firebase."
+For a computer-science student learning AI engineering, ArgosHound might recommend
+interviewing the organizers, building a prototype, contributing it to the club, or
+turning the recurring need into a general product.
 
-ArgosHound recognizes:
+Builder-opportunity types include:
 
-This is not a product opportunity.
-
-Instead, it matches the builder's skills and recommends pursuing the opportunity.
-
-Questions ArgosHound asks:
-
-- Can the builder personally solve this?
-- Is this worth pursuing?
-- How valuable is it?
-- Why does it fit?
-
-Output:
-
-- Opportunity type
-- Confidence
-- Reasoning
-- Suggested action
-
----
-
-## Feature 3 — Continuous Learning
-
-This is the long term differentiator.
-
-ArgosHound should continuously learn what creates successful outcomes for each individual builder.
-
-Rather than optimizing products, it optimizes opportunities.
-
-Marketing learning:
-
-- Which communities convert
-- Which messaging works
-- Which audiences respond
-- Which products succeed
-
-Builder learning:
-
-- Which opportunity types lead to success
-- Which technologies repeatedly produce value
-- Which communities fit the builder
-- Which projects become worthwhile
-
-Examples of tracked outcomes:
-
-Products
-
-- Click
-- Signup
-- Active user
-- Purchase
-
-Builder Opportunities
-
-- Portfolio viewed
-- GitHub viewed
-- Interview
+- Freelance or consulting work
+- A portfolio or learning project
+- Open-source contribution
 - Collaboration
-- Contract
-- PR merged
+- Community service
+- Research
+- Startup or product exploration
 
-Initially these outcomes can be entered manually.
+## Unified Decision Flow
 
-No machine learning is required for the MVP.
-
-Simple scoring is sufficient.
-
----
-
-# Unifying Decision Tree
-
-Every discussion follows the same logic.
-
-```
-Internet Discussion
-        │
-        ▼
-Recognize Pain Point
-        │
-        ▼
-Does the builder have an existing product that solves it?
-        │
-   Yes ───────► Customer Opportunity
-        │
-        No
-        │
-        ▼
-Can the builder solve it?
-        │
-   Yes ───────► Builder Opportunity
-        │
-        No
-        │
-        ▼
-Ignore
+```text
+Public discussion
+        |
+        v
+Is there a credible problem, need, or request?
+        |
+        v
+Does one of this builder's products meaningfully address it?
+        | Yes
+        +------> PRODUCT opportunity
+        |
+        | No
+        v
+Can this builder address it in a way that advances their goals?
+        | Yes
+        +------> BUILDER opportunity
+        |
+        | No
+        v
+NONE
 ```
 
-Every outcome feeds back into the Continuous Learning system.
+The top-level opportunity type is:
 
----
+- `PRODUCT`
+- `BUILDER`
+- `NONE`
 
-# Builder Profile
+Product match type is a separate, nullable field. This prevents `ADJACENT` or
+`SMALL_EXTENSION` from being confused with the top-level decision.
 
-Everything revolves around a Builder Profile.
+## Opportunity Report
 
-Example attributes:
+Every surfaced opportunity should answer:
+
+- What problem was detected?
+- What source evidence supports that conclusion?
+- Who is discussing it, without creating a separate profile about them?
+- Why does it fit this builder?
+- Which product or capabilities match?
+- What are the limitations and risks?
+- What action could the builder take?
+- How confident is the system?
+
+An opportunity report includes:
+
+- Source platform, community, thread URL, title, and timestamp
+- Relevant subthread or comment URLs and short excerpts
+- Detected problem, topic, and sentiment
+- Opportunity type and optional subtype
+- Matched product or builder capabilities
+- Evidence-based explanation
+- Confidence and transparent opportunity score
+- Suggested next step
+- Campaign link when appropriate
+
+## Outreach Boundary
+
+ArgosHound may suggest an outreach message or action, but it does not automatically
+post, comment, or send a private message in the MVP.
+
+The builder must review the source and approve any external action. Relevant public
+comments may be linked as evidence, but ArgosHound should avoid persistent dossiers,
+sensitive-trait inference, or person-level behavioral tracking.
+
+Community rules and source-platform terms always apply. A relevant public response is
+generally preferable to unsolicited private outreach.
+
+## Campaign Links and Attribution
+
+ArgosHound can generate a random, opportunity-scoped campaign code:
+
+```text
+https://example.app/r/7Gk92P
+```
+
+The code identifies the opportunity or campaign, not a named commenter. Its destination
+may be a product page, signup page, portfolio, project page, or other builder-controlled
+page.
+
+The MVP can record:
+
+- Link opened
+- Product or portfolio explored
+- Signup
+- Activation
+- Contact initiated
+- Purchase or contract, when manually reported
+
+Destination pages should disclose measurement, avoid invasive fingerprinting, and
+collect only the events needed for attribution.
+
+## Continuous Learning
+
+ArgosHound learns from market outcomes and builder outcomes.
+
+### Market signals
+
+- Source platform and community
+- Topic and detected sentiment
+- Matched product
+- Match type
+- Campaign opened
+- Signup, activation, or purchase
+
+### Builder signals
+
+- Viewed, saved, dismissed, or pursued
+- Contacted the source
+- Built a prototype or completed a project
+- Reported learning value
+- Added work to a portfolio
+- Received a collaboration, interview, contract, or other career outcome
+- Requested more or fewer opportunities like it
+
+The MVP uses explicit weights and summarized history. It does not train a model on
+source-platform content.
+
+An initial ranking can combine:
+
+```text
+profile fit
++ evidence strength
++ product or skill relevance
++ source and topic history
++ builder preference history
++ previous outcome history
+- estimated effort
+- outreach or privacy risk
+```
+
+The UI should expose the important factors so the builder can understand why the score
+changed.
+
+## Builder Profile
+
+The profile contains:
 
 - Name
-- Skills
-- Products
-- Interests
+- Products and their capabilities
+- Current skills
+- Skills the builder wants to develop
+- Interests and preferred problem areas
 - Goals
-- Preferred technologies
-- Industries
-- Historical outcomes
-- Successful communities
+- Preferred opportunity types
+- Optional location or geographic radius
+- Effort and time preferences
+- Summarized decisions and outcomes
 
-Every recommendation is personalized against this profile.
+## MVP Scope
 
----
+The hackathon MVP proves that ArgosHound can:
 
-# Core Workflow
+1. Represent one builder, their products, skills, and goals.
+2. Analyze a small set of seeded or pasted Reddit discussions.
+3. Return `PRODUCT`, `BUILDER`, or `NONE`.
+4. Show source evidence, reasoning, confidence, and a suggested action.
+5. Generate an opportunity-scoped campaign link.
+6. Record simulated or real first-party engagement events.
+7. Record a builder decision or outcome.
+8. Demonstrate a visible ranking change from that history.
 
-```
-Online Discussion
-        │
-        ▼
-Extract Pain Point
-        │
-        ▼
-Determine Opportunity Type
-        │
-        ▼
-Match Builder Profile
-        │
-        ▼
-Generate Recommendation
-        │
-        ▼
-Present to User
-        │
-        ▼
-Receive Feedback
-        │
-        ▼
-Learn
-```
+Live, continuous Reddit ingestion is optional for the hackathon. The architecture must
+allow a compliant connector to replace seeded data later.
 
----
+## Out of Scope
 
-# MVP Scope
+- Automated comments or private messages
+- Person-level lead profiles
+- Sensitive-trait inference
+- Multi-builder marketplace matching
+- Authentication and team permissions
+- Payments
+- Browser extensions
+- Fully autonomous agents
+- Cross-site tracking or device fingerprinting
+- Complex machine learning or model fine-tuning
+- Production-scale ingestion
 
-The hackathon MVP only needs to prove one thing:
+## Future Sources and Capabilities
 
-**ArgosHound can recognize opportunities hidden inside online discussions.**
-
-Supported source:
-
-- Reddit
-
-Future sources:
-
-- YouTube
-- GitHub Issues
+- YouTube comments
+- GitHub Issues and Discussions
 - Hacker News
 - Stack Overflow
-- Discord
+- Discord communities with appropriate authorization
 - Product Hunt
-
----
-
-# System Architecture
-
-```
-React + Vite
-       │
-ASP.NET Core API
-       │
- ├── Builder Service
- ├── Opportunity Service
- ├── Reddit Service
- ├── LLM Service
- └── Learning Service
-       │
-Azure OpenAI
-       │
-SQLite
-```
-
-Future:
-
-- Azure Cosmos DB
-- Azure AI Foundry Agents
-- Additional data connectors
-
----
-
-# Backend Responsibilities
-
-The backend owns:
-
-- Reddit ingestion
-- Opportunity generation
-- AI prompting
-- Confidence scoring
-- Persistence
-- Feedback collection
-- Learning
-
-The frontend should remain mostly presentational.
-
----
-
-# Initial API
-
-```
-GET  /builder
-PUT  /builder
-
-POST /discover
-
-GET  /opportunities
-
-POST /feedback
-```
-
----
-
-# Initial Models
-
-## Builder
-
-- Id
-- Name
-- Skills
-- Products
-- Interests
-- Goals
-
----
-
-## Opportunity
-
-- Id
-- Source
-- Content
-- OpportunityType
-- Confidence
-- Score
-- Explanation
-- SuggestedAction
-
----
-
-## Feedback
-
-- OpportunityId
-- Outcome
-- Timestamp
-
----
-
-# Prompt Philosophy
-
-Prompts are source code.
-
-Store prompts separately from application logic.
-
-Example:
-
-```
-Prompts/
-
-product_match.txt
-
-builder_match.txt
-
-score.txt
-
-summarize.txt
-```
-
-Prompt iteration should never require modifying business logic.
-
----
-
-# UI
-
-Initial pages:
-
-- Dashboard
-- Builder Profile
-- Opportunity Feed
-- Opportunity Details
-
-The Opportunity Feed is the most important screen.
-
-Every opportunity card should clearly communicate:
-
-- Pain Point
-- Opportunity Type
-- Confidence
-- Reasoning
-- Suggested Action
-
----
-
-# Out of Scope
-
-For now:
-
-- Authentication
-- Payments
-- OAuth
-- Browser extensions
-- Discord integration
-- GitHub integration
-- Dynamic portfolio pages
-- Automatic posting
-- Email
-- Notifications
-- Analytics dashboards
-- Complex machine learning
-
----
-
-# Future Roadmap
-
-- GitHub issue discovery
-- Personalized outreach generation
-- Portfolio optimization
-- Daily Argos Report
-- Opportunity ranking
-- Personalized landing pages
-- Autonomous agent workflows
-- Continuous Builder Profile evolution
-- Additional community connectors
-
----
-
-# Design Principles
-
-Every feature should answer one question:
-
-> **Does this help the builder discover, prioritize, or act on valuable opportunities?**
-
-If not, it probably does not belong in ArgosHound.
-
----
-
-# Success Criteria
-
-The MVP is successful if someone can:
-
-1. Create a Builder Profile.
-2. Analyze a Reddit discussion.
-3. Receive a high-quality recommendation.
-4. Understand exactly why it was recommended.
-5. Provide feedback.
-6. Observe recommendations improving over time.
-
----
-
-# Elevator Pitch
-
-ArgosHound is an AI talent agent for builders.
-
-It continuously scans online communities, recognizes hidden opportunities, and determines whether they represent:
-
-- a customer for one of your products,
-- an opportunity for you personally,
-- or neither.
-
-Over time, it learns which opportunities create the most value for you, becoming an increasingly effective representative that works on your behalf.
+- Scheduled scouting reports
+- Builder-controlled outreach integrations
+- Additional attribution and outcome integrations
+- Personalized portfolio or product landing pages
+
+## Success Criteria
+
+The demo is successful when a viewer can:
+
+1. See a product opportunity supported by a real or seeded discussion.
+2. See a builder opportunity matched to skills and learning goals.
+3. Inspect the exact evidence behind both recommendations.
+4. Understand the proposed next action and its limitations.
+5. Open a campaign link and observe an attributed event.
+6. Submit a builder decision or outcome.
+7. See that event affect a later opportunity ranking.
+
+## Elevator Pitch
+
+ArgosHound is an AI opportunity scout for builders. It finds public conversations where
+an existing product could gain a user or where the builder could solve a valuable
+problem, then learns from which communities, topics, projects, and actions produce real
+customer and career outcomes.
