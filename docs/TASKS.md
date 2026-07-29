@@ -45,13 +45,13 @@ stable IDs and URLs.
 
 ### 2. Builder and product fixtures
 
-- [ ] Define the `BuilderProfile` model
-- [ ] Define the `Product` model
-- [ ] Seed one builder
-- [ ] Add current skills, learning goals, interests, and effort preferences
-- [ ] Add 3–5 products owned by that builder
-- [ ] Give products explicit capabilities, target users, and destination URLs
-- [ ] Include direct, adjacent, and deliberately weak product fits
+- [x] Define the `BuilderProfile` model
+- [x] Define the `Product` model
+- [x] Seed one builder
+- [x] Add current skills, learning goals, interests, and effort preferences
+- [x] Add 3–5 products owned by that builder
+- [x] Give products explicit capabilities, target users, and destination URLs
+- [x] Include direct, adjacent, and deliberately weak product fits
 
 ### 3. LLM-assisted profile import
 
