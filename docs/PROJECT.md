@@ -239,18 +239,53 @@ The profile contains:
 - Effort and time preferences
 - Summarized decisions and outcomes
 
+## LLM-Assisted Profile Onboarding
+
+Many builders already use an AI assistant that knows their projects, skills, preferences,
+and goals. ArgosHound should let them reuse that context instead of rebuilding their
+profile from scratch.
+
+The integration has two separate responsibilities:
+
+1. **Model provider:** choose an LLM service that performs opportunity analysis.
+2. **Context provider:** import builder-approved information from an assistant such as
+   ChatGPT or Claude.
+
+These responsibilities must remain independent. Connecting an OpenAI or Anthropic API
+does not automatically grant access to a consumer ChatGPT or Claude account, its
+conversations, or its memory.
+
+The initial onboarding flow should be provider-neutral:
+
+1. ArgosHound supplies a prompt asking the user's assistant to summarize relevant
+   projects, products, skills, interests, learning goals, constraints, and preferences.
+2. The user runs it in their preferred assistant.
+3. The user pastes or uploads the result to ArgosHound.
+4. ArgosHound converts it into a proposed Builder Profile.
+5. The user reviews, edits, and explicitly approves every field before it is saved.
+
+Where a provider supports a user-controlled memory export, ArgosHound may accept that
+export, but should prefer a narrow profile summary over an entire chat archive. Raw
+imports should be deleted after profile extraction unless the user explicitly chooses
+otherwise.
+
+A future provider connection may use OAuth only when the provider exposes an official,
+documented scope for the requested context. Signing in with an LLM account must never
+be presented as permission to read memory when that capability is unavailable.
+
 ## MVP Scope
 
 The hackathon MVP proves that ArgosHound can:
 
 1. Represent one builder, their products, skills, and goals.
-2. Analyze a small set of seeded or pasted Reddit discussions.
-3. Return `PRODUCT`, `BUILDER`, or `NONE`.
-4. Show source evidence, reasoning, confidence, and a suggested action.
-5. Generate an opportunity-scoped campaign link.
-6. Record simulated or real first-party engagement events.
-7. Record a builder decision or outcome.
-8. Demonstrate a visible ranking change from that history.
+2. Create a proposed profile from pasted, builder-approved LLM context.
+3. Analyze a small set of seeded or pasted Reddit discussions.
+4. Return `PRODUCT`, `BUILDER`, or `NONE`.
+5. Show source evidence, reasoning, confidence, and a suggested action.
+6. Generate an opportunity-scoped campaign link.
+7. Record simulated or real first-party engagement events.
+8. Record a builder decision or outcome.
+9. Demonstrate a visible ranking change from that history.
 
 Live, continuous Reddit ingestion is optional for the hackathon. The architecture must
 allow a compliant connector to replace seeded data later.
@@ -265,6 +300,8 @@ allow a compliant connector to replace seeded data later.
 - Payments
 - Browser extensions
 - Fully autonomous agents
+- Automatic access to ChatGPT or Claude consumer memory
+- Importing an entire chat history without review and data minimization
 - Cross-site tracking or device fingerprinting
 - Complex machine learning or model fine-tuning
 - Production-scale ingestion
@@ -278,6 +315,8 @@ allow a compliant connector to replace seeded data later.
 - Discord communities with appropriate authorization
 - Product Hunt
 - Scheduled scouting reports
+- Official LLM context-provider connections when supported
+- Periodic, user-approved profile refreshes from an assistant
 - Builder-controlled outreach integrations
 - Additional attribution and outcome integrations
 - Personalized portfolio or product landing pages
@@ -288,11 +327,12 @@ The demo is successful when a viewer can:
 
 1. See a product opportunity supported by a real or seeded discussion.
 2. See a builder opportunity matched to skills and learning goals.
-3. Inspect the exact evidence behind both recommendations.
-4. Understand the proposed next action and its limitations.
-5. Open a campaign link and observe an attributed event.
-6. Submit a builder decision or outcome.
-7. See that event affect a later opportunity ranking.
+3. Review a Builder Profile proposed from imported assistant context.
+4. Inspect the exact evidence behind both recommendations.
+5. Understand the proposed next action and its limitations.
+6. Open a campaign link and observe an attributed event.
+7. Submit a builder decision or outcome.
+8. See that event affect a later opportunity ranking.
 
 ## Elevator Pitch
 

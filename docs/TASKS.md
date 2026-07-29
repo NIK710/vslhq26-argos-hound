@@ -10,9 +10,10 @@
 
 The demo must prove both opportunity funnels and the shared learning loop:
 
-1. A discussion matches an existing builder-owned product.
-2. A discussion represents a problem the builder can solve while advancing their goals.
-3. A campaign event or builder outcome changes a later opportunity score.
+1. Builder-approved context from an existing AI assistant creates a proposed profile.
+2. A discussion matches an existing builder-owned product.
+3. A discussion represents a problem the builder can solve while advancing their goals.
+4. A campaign event or builder outcome changes a later opportunity score.
 
 Use one seeded builder and a small fixed set of Reddit-style discussions. Live Reddit
 access is optional and must not block the demo.
@@ -34,10 +35,10 @@ stable IDs and URLs.
 
 ### 1. Project foundation
 
-- [ ] Create `frontend/` and `backend/`
-- [ ] Add a repository `.gitignore`
-- [ ] Add `.env.example` files without credentials
-- [ ] Configure frontend and backend dependencies
+- [x] Create `frontend/` and `backend/`
+- [x] Add a repository `.gitignore`
+- [x] Add `.env.example` files without credentials
+- [x] Configure frontend and backend dependencies
 - [ ] Add a backend health endpoint
 - [ ] Confirm the frontend can call the backend
 - [ ] Document required environment-variable names
@@ -52,7 +53,20 @@ stable IDs and URLs.
 - [ ] Give products explicit capabilities, target users, and destination URLs
 - [ ] Include direct, adjacent, and deliberately weak product fits
 
-### 3. Source evidence
+### 3. LLM-assisted profile import
+
+- [ ] Define `ProfileImport` and `ProposedBuilderProfile`
+- [ ] Write a provider-neutral prompt that asks an assistant for relevant builder context
+- [ ] Accept a pasted ChatGPT, Claude, or other assistant summary
+- [ ] Treat imported text as untrusted input
+- [ ] Extract only supported Builder Profile fields
+- [ ] Show a field-level preview before saving
+- [ ] Let the builder edit, approve, reject, and delete the proposal
+- [ ] Do not label identity sign-in as memory access
+- [ ] Expire or delete raw imported content after approval
+- [ ] Keep the seeded profile as a demo fallback
+
+### 4. Source evidence
 
 - [ ] Define `SourceDiscussion` and `SourceComment`
 - [ ] Seed the three demo scenarios
@@ -62,10 +76,11 @@ stable IDs and URLs.
 - [ ] Render a source discussion and its relevant comments in the UI
 - [ ] Avoid creating a separate person or lead profile
 
-### 4. Structured analysis
+### 5. Structured analysis
 
 - [ ] Configure the Azure OpenAI deployment
 - [ ] Configure the Foundry agent or documented fallback model client
+- [ ] Put model calls behind an `ILlmAnalysisProvider` interface
 - [ ] Keep prompts outside application business logic
 - [ ] Delimit source content as untrusted input
 - [ ] Define the structured analysis schema
@@ -77,7 +92,7 @@ stable IDs and URLs.
 - [ ] Reject malformed output and unknown evidence or product IDs
 - [ ] Add timeout, retry, and user-visible failure behavior
 
-### 5. Product-opportunity flow
+### 6. Product-opportunity flow
 
 - [ ] Implement `POST /api/discovery`
 - [ ] Match the doomscrolling fixture to the seeded product
@@ -88,7 +103,7 @@ stable IDs and URLs.
 - [ ] Clearly label inferred problems as inferences
 - [ ] Verify the model does not invent product capabilities
 
-### 6. Campaign attribution
+### 7. Campaign attribution
 
 - [ ] Define `CampaignLink` and `EngagementEvent`
 - [ ] Generate a cryptographically random opportunity-scoped code
@@ -102,6 +117,7 @@ stable IDs and URLs.
 
 ### Day 1 exit criteria
 
+- [ ] Pasted assistant context produces a reviewable profile proposal
 - [ ] The product fixture produces a persisted `PRODUCT` opportunity
 - [ ] The report links to exact source evidence
 - [ ] The campaign link redirects and records an event
@@ -109,7 +125,7 @@ stable IDs and URLs.
 
 ## Day 2 — Builder Slice and Learning
 
-### 7. Builder-opportunity flow
+### 8. Builder-opportunity flow
 
 - [ ] Match the chess-club fixture against skills, goals, interests, and location
 - [ ] Return a builder-opportunity subtype
@@ -120,7 +136,7 @@ stable IDs and URLs.
 - [ ] Persist and render the `BUILDER` opportunity
 - [ ] Verify the unrelated fixture returns `NONE`
 
-### 8. Decisions and outcomes
+### 9. Decisions and outcomes
 
 - [ ] Define `BuilderDecision`
 - [ ] Define `Outcome`
@@ -131,7 +147,7 @@ stable IDs and URLs.
 - [ ] Add portfolio, collaboration, interview, and contract outcome types
 - [ ] Display the event and outcome timeline
 
-### 9. Transparent learning
+### 10. Transparent learning
 
 - [ ] Implement explicit scoring-factor weights
 - [ ] Keep model confidence separate from the final score
@@ -144,7 +160,7 @@ stable IDs and URLs.
 - [ ] Re-run or rescore a fixture after adding an outcome
 - [ ] Demonstrate a visible, explainable score change
 
-### 10. Core UI
+### 11. Core UI
 
 - [ ] Add a concise product explanation
 - [ ] Add the builder-profile summary
@@ -158,18 +174,20 @@ stable IDs and URLs.
 - [ ] Add loading, empty, and error states
 - [ ] Make the primary demo view responsive
 
-### 11. Reliability checks
+### 12. Reliability checks
 
 - [ ] Reject empty discussions
 - [ ] Test vague and contradictory discussions
 - [ ] Test invalid structured model output
 - [ ] Test source text containing prompt-injection instructions
+- [ ] Test prompt-injection instructions inside imported assistant context
 - [ ] Test unknown product and evidence IDs
 - [ ] Bound confidence and score values
 - [ ] Test expired or invalid campaign codes
 - [ ] Test redirect allowlisting
 - [ ] Confirm secrets and campaign codes are absent from logs
 - [ ] Confirm the UI never implies that an inference is a verified fact
+- [ ] Confirm profile fields do not change until import approval
 
 ### Day 2 exit criteria
 
@@ -182,6 +200,7 @@ stable IDs and URLs.
 ## Final Demo Checklist
 
 - [ ] One builder owns every product in the catalog
+- [ ] The assistant-context import requires preview and approval
 - [ ] The product-opportunity example works reliably
 - [ ] The builder-opportunity example works reliably
 - [ ] The no-opportunity example works reliably
@@ -201,6 +220,7 @@ stable IDs and URLs.
 - [ ] List required environment-variable names
 - [ ] Explain seeded versus live source data
 - [ ] Explain Foundry and Azure OpenAI responsibilities
+- [ ] Explain model providers versus assistant-context providers
 - [ ] Describe campaign measurement and the human-approval boundary
 - [ ] Add screenshots after the UI is stable
 
@@ -215,6 +235,15 @@ Only begin these after the complete demo works.
 - [ ] Add deduplication across repeated discussions
 - [ ] Add embeddings for candidate retrieval
 - [ ] Add community and topic preferences
+
+### LLM integrations
+
+- [ ] Add an Anthropic analysis-provider implementation
+- [ ] Support a narrowly selected ChatGPT data export
+- [ ] Support Claude's user-controlled memory export format
+- [ ] Add direct provider context connections only when officially supported
+- [ ] Add least-privilege OAuth, revocation, and sync auditing
+- [ ] Add periodic, user-approved profile refresh
 
 ### Outreach and destinations
 
@@ -248,5 +277,7 @@ Only begin these after the complete demo works.
 - Cross-platform identity resolution
 - Sensitive-trait inference
 - Multi-builder product matching
+- Assuming ChatGPT or Claude sign-in provides memory access
+- Background synchronization without explicit provider support and user consent
 - Device fingerprinting or cross-site tracking
 - Model fine-tuning on source-platform content
