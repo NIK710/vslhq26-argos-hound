@@ -55,26 +55,26 @@ stable IDs and URLs.
 
 ### 3. LLM-assisted profile import
 
-- [ ] Define `ProfileImport` and `ProposedBuilderProfile`
-- [ ] Write a provider-neutral prompt that asks an assistant for relevant builder context
-- [ ] Accept a pasted ChatGPT, Claude, or other assistant summary
-- [ ] Treat imported text as untrusted input
-- [ ] Extract only supported Builder Profile fields
-- [ ] Show a field-level preview before saving
-- [ ] Let the builder edit, approve, reject, and delete the proposal
-- [ ] Do not label identity sign-in as memory access
-- [ ] Expire or delete raw imported content after approval
-- [ ] Keep the seeded profile as a demo fallback
+- [x] Define `ProfileImport` and `ProposedBuilderProfile`
+- [x] Write a provider-neutral prompt that asks an assistant for relevant builder context
+- [x] Accept a pasted ChatGPT, Claude, or other assistant summary
+- [x] Treat imported text as untrusted input
+- [x] Extract only supported Builder Profile fields
+- [x] Show a field-level preview before saving
+- [x] Let the builder edit, approve, reject, and delete the proposal
+- [x] Do not label identity sign-in as memory access
+- [x] Expire or delete raw imported content after approval
+- [x] Keep the seeded profile as a demo fallback
 
 ### 4. Source evidence
 
-- [ ] Define `SourceDiscussion` and `SourceComment`
-- [ ] Seed the three demo scenarios
-- [ ] Preserve thread, comment, and community URLs
-- [ ] Add a manual discussion-ingestion endpoint
-- [ ] Validate required source fields
-- [ ] Render a source discussion and its relevant comments in the UI
-- [ ] Avoid creating a separate person or lead profile
+- [x] Define `SourceDiscussion` and `SourceComment`
+- [x] Seed the three demo scenarios
+- [x] Preserve thread, comment, and community URLs
+- [x] Add a manual discussion-ingestion endpoint
+- [x] Validate required source fields
+- [x] Render a source discussion and its relevant comments in the UI
+- [x] Avoid creating a separate person or lead profile
 
 ### 5. Structured analysis
 

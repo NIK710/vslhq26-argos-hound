@@ -10,7 +10,7 @@ public static class DemoData
     public static BuilderProfile Builder { get; } = new()
     {
         Id = BuilderId,
-        Name = "Jordan Lee",
+        Name = "John Doe",
         CurrentSkills =
         [
             "C#",

@@ -29,6 +29,252 @@
   box-shadow: var(--shadow);
 }
 
+.profile-import {
+  margin-top: 72px;
+}
+
+.source-evidence {
+  margin-top: 72px;
+}
+
+.section-heading {
+  max-width: 640px;
+}
+
+.section-heading h2 {
+  font-size: 32px;
+}
+
+.import-form,
+.review-panel {
+  display: grid;
+  gap: 20px;
+  margin-top: 28px;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+label {
+  display: grid;
+  gap: 8px;
+  color: var(--text-h);
+  font-weight: 600;
+}
+
+input,
+select,
+textarea,
+button {
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font: inherit;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 10px 12px;
+  color: var(--text-h);
+  background: var(--bg);
+}
+
+textarea {
+  resize: vertical;
+  font-family: var(--mono);
+  font-size: 14px;
+}
+
+button {
+  width: fit-content;
+  padding: 10px 16px;
+  color: white;
+  background: var(--accent);
+  border-color: transparent;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+button.secondary {
+  color: var(--text-h);
+  background: transparent;
+  border-color: var(--border);
+}
+
+button.danger {
+  color: #dc2626;
+  background: transparent;
+  border-color: #fecaca;
+}
+
+.review-meta,
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.review-meta {
+  color: var(--text);
+  font-size: 14px;
+}
+
+.status-badge {
+  padding: 3px 9px;
+  border-radius: 999px;
+  color: #92400e;
+  background: #fef3c7;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.status-badge--approved {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.status-badge--rejected {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+.change-preview,
+.profile-fields {
+  display: grid;
+  gap: 14px;
+}
+
+.change-row {
+  display: grid;
+  grid-template-columns: 150px 1fr 1fr;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+
+.change-row span:first-of-type::before {
+  content: 'Current: ';
+  color: var(--text);
+}
+
+.change-row span:last-of-type::before {
+  content: 'Proposed: ';
+  color: var(--text);
+}
+
+.error-message {
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: 8px;
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+.source-state {
+  margin-top: 24px;
+}
+
+.source-browser {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.75fr) minmax(0, 1.5fr);
+  gap: 20px;
+  margin-top: 28px;
+}
+
+.source-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+button.source-list-item {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  padding: 14px;
+  color: var(--text);
+  text-align: left;
+  background: transparent;
+  border-color: var(--border);
+}
+
+.source-list-item strong {
+  color: var(--text-h);
+}
+
+.source-list-item span,
+.source-list-item small {
+  font-size: 12px;
+}
+
+button.source-list-item--selected {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.discussion-detail {
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.discussion-detail h3 {
+  margin: 12px 0;
+  color: var(--text-h);
+  font-size: 24px;
+}
+
+.source-meta,
+.comment-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: var(--text);
+  font-size: 12px;
+}
+
+.source-attribution {
+  margin-top: 12px;
+  font-size: 13px;
+}
+
+.source-link,
+.source-comment a {
+  display: inline-block;
+  margin-top: 12px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.comment-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.comment-list h4 {
+  margin: 0;
+  color: var(--text-h);
+}
+
+.source-comment {
+  padding: 16px;
+  border-left: 3px solid var(--accent-border);
+  background: var(--social-bg);
+}
+
+.source-comment p {
+  margin-top: 8px;
+}
+
 .connection-card h2 {
   margin-bottom: 6px;
 }
@@ -57,5 +303,13 @@
 @media (max-width: 640px) {
   .app-shell {
     padding: 56px 0;
+  }
+
+  .change-row {
+    grid-template-columns: 1fr;
+  }
+
+  .source-browser {
+    grid-template-columns: 1fr;
   }
 }

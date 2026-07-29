@@ -1,3 +1,7 @@
+using ArgosHound.Api.Services;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 var builder = WebApplication.CreateBuilder(args);
 
 const string frontendCorsPolicy = "Frontend";
@@ -6,8 +10,17 @@ var allowedOrigins = builder.Configuration
     .Get<string[]>()
     ?? ["http://localhost:5173", "http://127.0.0.1:5173"];
 
-builder.Services.AddControllers();
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(
+            new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+    });
 builder.Services.AddHealthChecks();
+builder.Services.AddSingleton<IBuilderProfileStore, InMemoryBuilderProfileStore>();
+builder.Services.AddSingleton<IProfileImportService, InMemoryProfileImportService>();
+builder.Services.AddSingleton<ISourceDiscussionService, InMemorySourceDiscussionService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(frontendCorsPolicy, policy =>
