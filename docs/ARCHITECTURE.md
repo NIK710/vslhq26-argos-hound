@@ -243,7 +243,6 @@ argoshound/
 │   ├── PROJECT.md
 │   ├── ARCHITECTURE.md
 │   ├── TASKS.md
-│   └── DECISIONS.md
 └── README.md
 ```
 
