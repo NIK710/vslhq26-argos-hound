@@ -173,7 +173,7 @@ npm run build
 7. Save or pursue an opportunity, report an outcome, and observe the explainable
    history score factor.
 
-- **Video:** Not included yet
+- **Video:**: https://youtu.be/FYXJDRa-TQY
 
 
 ## Known limitations
