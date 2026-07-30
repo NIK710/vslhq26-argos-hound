@@ -5,7 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ArgosHound.Api.Services;
 
-public sealed class OpportunityActivityService(ArgosHoundDbContext dbContext)
+public sealed class OpportunityActivityService(
+    ArgosHoundDbContext dbContext,
+    LearningService learningService)
 {
     public async Task<OpportunityActivityResponse?> GetAsync(Guid opportunityId, CancellationToken token)
     {
@@ -39,6 +41,7 @@ public sealed class OpportunityActivityService(ArgosHoundDbContext dbContext)
         };
         dbContext.BuilderDecisions.Add(item);
         await dbContext.SaveChangesAsync(token);
+        await learningService.RescoreAsync(opportunityId, token);
         return new(item.Id, item.OpportunityId, request.DecisionType, item.Reason, item.OccurredAt);
     }
 
@@ -55,6 +58,7 @@ public sealed class OpportunityActivityService(ArgosHoundDbContext dbContext)
         };
         dbContext.Outcomes.Add(item);
         await dbContext.SaveChangesAsync(token);
+        await learningService.RescoreAsync(opportunityId, token);
         return new(item.Id, item.OpportunityId, request.OutcomeType, item.Note, item.OccurredAt);
     }
 

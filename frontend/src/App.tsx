@@ -176,6 +176,21 @@ type OpportunityActivity = {
   outcomes: Outcome[]
 }
 
+type LearningAggregate = {
+  value: string
+  opportunities: number
+  decisions: number
+  outcomes: number
+}
+
+type LearningSummary = {
+  sources: LearningAggregate[]
+  communities: LearningAggregate[]
+  topics: LearningAggregate[]
+  products: LearningAggregate[]
+  opportunityTypes: LearningAggregate[]
+}
+
 type CreateCampaignLinkResponse = {
   campaign: CampaignLink
   redirectUrl: string
@@ -248,6 +263,7 @@ function App() {
   const [isCreatingCampaign, setIsCreatingCampaign] = useState(false)
   const [activityNote, setActivityNote] = useState('')
   const [outcomeType, setOutcomeType] = useState('learningValue')
+  const [learningSummary, setLearningSummary] = useState<LearningSummary | null>(null)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -282,6 +298,17 @@ function App() {
     void checkBackend()
 
     return () => controller.abort()
+  }, [])
+
+  async function loadLearningSummary() {
+    const response = await fetch(`${apiBaseUrl}/api/learning/summary`)
+    if (response.ok) {
+      setLearningSummary((await response.json()) as LearningSummary)
+    }
+  }
+
+  useEffect(() => {
+    void loadLearningSummary()
   }, [])
 
   useEffect(() => {
@@ -666,6 +693,8 @@ function App() {
       },
     })
     setActivityNote('')
+    await selectOpportunity(selectedOpportunity.opportunity.id)
+    await loadLearningSummary()
   }
 
   async function recordOutcome(event: React.FormEvent<HTMLFormElement>) {
@@ -692,6 +721,8 @@ function App() {
       },
     })
     setActivityNote('')
+    await selectOpportunity(selectedOpportunity.opportunity.id)
+    await loadLearningSummary()
   }
 
   return (
@@ -1434,6 +1465,44 @@ function App() {
                 </section>
               </article>
             )}
+          </div>
+        )}
+      </section>
+
+      <section className="learning-summary">
+        <div className="section-heading">
+          <p className="eyebrow">Transparent learning</p>
+          <h2>Relevant history</h2>
+          <p>
+            Decisions and reported learning or career outcomes update an explicit
+            history score factor. Model confidence remains separate.
+          </p>
+        </div>
+        {learningSummary && (
+          <div className="learning-groups">
+            {([
+              ['Communities', learningSummary.communities],
+              ['Topics', learningSummary.topics],
+              ['Products', learningSummary.products],
+              ['Opportunity types', learningSummary.opportunityTypes],
+              ['Sources', learningSummary.sources],
+            ] as const).map(([label, items]) => (
+              <div key={label}>
+                <strong>{label}</strong>
+                {items.length === 0
+                  ? <p>No history yet.</p>
+                  : (
+                    <ul>
+                      {items.map((item) => (
+                        <li key={item.value}>
+                          {item.value}: {item.opportunities} opportunities,{' '}
+                          {item.decisions} decisions, {item.outcomes} outcomes
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+              </div>
+            ))}
           </div>
         )}
       </section>

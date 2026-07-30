@@ -22,14 +22,15 @@ public sealed class OpportunityScoringService : IOpportunityScoringService
         }
 
         var evidencePoints = Math.Min(
-            20,
-            analysis.EvidenceReferences.Count * 5);
-        var clarityPoints = analysis.Problem.Inferred ? 8 : 15;
+            OpportunityScoreWeights.EvidenceMaximum,
+            analysis.EvidenceReferences.Count * OpportunityScoreWeights.EvidencePerReference);
+        var clarityPoints = analysis.Problem.Inferred
+            ? OpportunityScoreWeights.InferredProblem
+            : OpportunityScoreWeights.ExplicitProblem;
         var fitFactor = CalculateFit(analysis, context);
-        const int actionabilityPoints = 15;
         var limitationPenalty = -Math.Min(
-            15,
-            analysis.Limitations.Count * 3);
+            OpportunityScoreWeights.LimitationPenaltyMaximum,
+            analysis.Limitations.Count * OpportunityScoreWeights.LimitationPenalty);
 
         OpportunityScoreFactor[] factors =
         [
@@ -49,7 +50,7 @@ public sealed class OpportunityScoringService : IOpportunityScoringService
             new(
                 "actionability",
                 "Actionability",
-                actionabilityPoints,
+                OpportunityScoreWeights.Actionability,
                 "The analysis includes a concrete, reviewable next action."),
             new(
                 "uncertainty",
@@ -71,9 +72,9 @@ public sealed class OpportunityScoringService : IOpportunityScoringService
         {
             var points = analysis.ProductMatch!.MatchType switch
             {
-                ProductMatchType.Direct => 35,
-                ProductMatchType.Adjacent => 25,
-                ProductMatchType.SmallExtension => 18,
+                ProductMatchType.Direct => OpportunityScoreWeights.DirectProductFit,
+                ProductMatchType.Adjacent => OpportunityScoreWeights.AdjacentProductFit,
+                ProductMatchType.SmallExtension => OpportunityScoreWeights.SmallExtensionFit,
                 _ => 0,
             };
 
@@ -88,7 +89,9 @@ public sealed class OpportunityScoringService : IOpportunityScoringService
         var profileSignals = context.Builder.CurrentSkills.Count
             + context.Builder.LearningGoals.Count
             + context.Builder.Interests.Count;
-        var builderPoints = Math.Min(30, 20 + profileSignals / 3);
+        var builderPoints = Math.Min(
+            OpportunityScoreWeights.BuilderFitMaximum,
+            20 + profileSignals / 3);
 
         return new OpportunityScoreFactor(
             "builderFit",

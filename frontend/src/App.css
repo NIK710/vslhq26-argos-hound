@@ -41,6 +41,22 @@
   margin-top: 72px;
 }
 
+.learning-summary {
+  margin-top: 72px;
+}
+
+.learning-groups {
+  display: grid;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.learning-groups > div {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
 .activity-panel {
   display: grid;
   gap: 14px;

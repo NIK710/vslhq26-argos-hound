@@ -149,16 +149,16 @@ stable IDs and URLs.
 
 ### 10. Transparent learning
 
-- [ ] Implement explicit scoring-factor weights
-- [ ] Keep model confidence separate from the final score
-- [ ] Aggregate history by source, community, topic, product, and opportunity type
-- [ ] Weight a click less than activation or conversion
-- [ ] Incorporate saved, dismissed, and pursued decisions
-- [ ] Incorporate reported learning and career outcomes
-- [ ] Implement `GET /api/learning/summary`
-- [ ] Display score factors and relevant history in the UI
-- [ ] Re-run or rescore a fixture after adding an outcome
-- [ ] Demonstrate a visible, explainable score change
+- [x] Implement explicit scoring-factor weights
+- [x] Keep model confidence separate from the final score
+- [x] Aggregate history by source, community, topic, product, and opportunity type
+- [ ] Weight a click less than activation or conversion *(deferred for the MVP)*
+- [x] Incorporate saved, dismissed, and pursued decisions
+- [x] Incorporate reported learning and career outcomes
+- [x] Implement `GET /api/learning/summary`
+- [x] Display score factors and relevant history in the UI
+- [x] Re-run or rescore a fixture after adding an outcome
+- [x] Demonstrate a visible, explainable score change
 
 ### 11. Core UI
 

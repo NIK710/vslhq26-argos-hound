@@ -54,14 +54,15 @@ public sealed class Day2FlowTests
         var opportunityId = Guid.NewGuid();
         db.Opportunities.Add(new OpportunityEntity
         {
-            Id = opportunityId, DiscussionId = Guid.NewGuid(), Type = "Builder",
+            Id = opportunityId, DiscussionId = DemoSourceData.ChessClubDiscussionId, Type = "Builder",
             Problem = "Coordination", Topic = "Chess", Sentiment = "Negative",
             MatchedCapabilitiesJson = "[]", LimitationsJson = "[]",
             Explanation = "Fit", SuggestedAction = "Interview", Confidence = .8m,
             ScoreFactorsJson = "[]", CreatedAt = DateTimeOffset.UtcNow,
         });
         await db.SaveChangesAsync();
-        var service = new OpportunityActivityService(db);
+        var service = new OpportunityActivityService(
+            db, new LearningService(db, new InMemorySourceDiscussionService()));
 
         await service.DecideAsync(opportunityId,
             new RecordDecisionRequest(BuilderDecisionType.Pursued, "Strong local fit"),
@@ -70,8 +71,16 @@ public sealed class Day2FlowTests
             new RecordOutcomeRequest(OutcomeType.PrototypeCompleted, "Check-in demo"),
             default);
         var activity = await service.GetAsync(opportunityId, default);
+        var rescored = await db.Opportunities.AsNoTracking()
+            .SingleAsync(x => x.Id == opportunityId);
+        var summary = await new LearningService(
+            db, new InMemorySourceDiscussionService()).GetSummaryAsync(default);
 
         Assert.Single(activity!.Decisions);
         Assert.Single(activity.Outcomes);
+        Assert.Equal(13, rescored.Score);
+        Assert.Contains("relevantHistory", rescored.ScoreFactorsJson);
+        Assert.Contains(summary.Communities, x =>
+            x.Value == "r/chicago" && x.Decisions == 1 && x.Outcomes == 1);
     }
 }
