@@ -94,14 +94,14 @@ stable IDs and URLs.
 
 ### 6. Product-opportunity flow
 
-- [ ] Implement `POST /api/discovery`
-- [ ] Match the doomscrolling fixture to the seeded product
-- [ ] Calculate deterministic score factors in the backend
-- [ ] Persist the opportunity and evidence references
-- [ ] Implement opportunity list and detail endpoints
-- [ ] Display source, relevant comments, product match, limitations, and score
-- [ ] Clearly label inferred problems as inferences
-- [ ] Verify the model does not invent product capabilities
+- [x] Implement `POST /api/discovery`
+- [x] Match the doomscrolling fixture to the seeded product
+- [x] Calculate deterministic score factors in the backend
+- [x] Persist the opportunity and evidence references
+- [x] Implement opportunity list and detail endpoints
+- [x] Display source, relevant comments, product match, limitations, and score
+- [x] Clearly label inferred problems as inferences
+- [x] Verify the model does not invent product capabilities
 
 ### 7. Campaign attribution
 

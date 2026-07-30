@@ -77,6 +77,55 @@ type AnalyzeDiscussionResponse = {
   analyzedAt: string
 }
 
+type OpportunityScoreFactor = {
+  key: string
+  label: string
+  points: number
+  explanation: string
+}
+
+type Opportunity = {
+  id: string
+  discussionId: string
+  type: 'product' | 'builder' | 'none'
+  productMatchType: 'direct' | 'adjacent' | 'smallExtension' | null
+  problem: string
+  problemInferred: boolean
+  topic: string
+  sentiment: 'negative' | 'mixed' | 'neutral' | 'positive'
+  matchedProductId: string | null
+  matchedProductName: string | null
+  matchedCapabilities: string[]
+  limitations: string[]
+  evidenceReferences: string[]
+  explanation: string
+  suggestedAction: string
+  confidence: number
+  score: number
+  scoreFactors: OpportunityScoreFactor[]
+  createdAt: string
+}
+
+type OpportunitySummary = Pick<
+  Opportunity,
+  | 'id'
+  | 'discussionId'
+  | 'type'
+  | 'problem'
+  | 'problemInferred'
+  | 'topic'
+  | 'score'
+  | 'confidence'
+  | 'suggestedAction'
+  | 'createdAt'
+>
+
+type OpportunityDetail = {
+  opportunity: Opportunity
+  source: SourceDiscussion
+  relevantComments: SourceComment[]
+}
+
 type BackendStatus =
   | { state: 'checking'; message: string }
   | { state: 'connected'; message: string }
@@ -127,6 +176,12 @@ function App() {
     useState<AnalyzeDiscussionResponse | null>(null)
   const [analysisError, setAnalysisError] = useState<string | null>(null)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [opportunities, setOpportunities] = useState<OpportunitySummary[]>([])
+  const [selectedOpportunity, setSelectedOpportunity] =
+    useState<OpportunityDetail | null>(null)
+  const [opportunityError, setOpportunityError] = useState<string | null>(null)
+  const [opportunitiesLoading, setOpportunitiesLoading] = useState(true)
+  const [isDiscovering, setIsDiscovering] = useState(false)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -159,6 +214,40 @@ function App() {
     }
 
     void checkBackend()
+
+    return () => controller.abort()
+  }, [])
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    async function loadOpportunities() {
+      try {
+        const response = await fetch(`${apiBaseUrl}/api/opportunities`, {
+          signal: controller.signal,
+        })
+
+        if (!response.ok) {
+          throw new Error(await readApiError(response))
+        }
+
+        setOpportunities((await response.json()) as OpportunitySummary[])
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') {
+          return
+        }
+
+        setOpportunityError(
+          error instanceof Error
+            ? error.message
+            : 'Unable to load opportunities',
+        )
+      } finally {
+        setOpportunitiesLoading(false)
+      }
+    }
+
+    void loadOpportunities()
 
     return () => controller.abort()
   }, [])
@@ -371,6 +460,74 @@ function App() {
       )
     } finally {
       setIsAnalyzing(false)
+    }
+  }
+
+  async function discoverSelectedDiscussion() {
+    if (!selectedDiscussion) return
+
+    setOpportunityError(null)
+    setIsDiscovering(true)
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/discovery`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ discussionId: selectedDiscussion.id }),
+      })
+
+      if (!response.ok) {
+        throw new Error(await readApiError(response))
+      }
+
+      const report = (await response.json()) as OpportunityDetail
+      setSelectedOpportunity(report)
+      setOpportunities((current) => {
+        const summary: OpportunitySummary = {
+          id: report.opportunity.id,
+          discussionId: report.opportunity.discussionId,
+          type: report.opportunity.type,
+          problem: report.opportunity.problem,
+          problemInferred: report.opportunity.problemInferred,
+          topic: report.opportunity.topic,
+          score: report.opportunity.score,
+          confidence: report.opportunity.confidence,
+          suggestedAction: report.opportunity.suggestedAction,
+          createdAt: report.opportunity.createdAt,
+        }
+
+        return [
+          summary,
+          ...current.filter((item) => item.id !== summary.id),
+        ]
+      })
+    } catch (error) {
+      setOpportunityError(
+        error instanceof Error
+          ? error.message
+          : 'Unable to discover an opportunity',
+      )
+    } finally {
+      setIsDiscovering(false)
+    }
+  }
+
+  async function selectOpportunity(id: string) {
+    setOpportunityError(null)
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/api/opportunities/${id}`)
+      if (!response.ok) {
+        throw new Error(await readApiError(response))
+      }
+
+      setSelectedOpportunity((await response.json()) as OpportunityDetail)
+    } catch (error) {
+      setOpportunityError(
+        error instanceof Error
+          ? error.message
+          : 'Unable to load the opportunity report',
+      )
     }
   }
 
@@ -632,6 +789,16 @@ function App() {
                   <span>
                     Review only — this does not save an opportunity or contact anyone.
                   </span>
+                  <button
+                    type="button"
+                    className="secondary"
+                    onClick={discoverSelectedDiscussion}
+                    disabled={isDiscovering}
+                  >
+                    {isDiscovering
+                      ? 'Discovering and saving…'
+                      : 'Discover and save'}
+                  </button>
                 </div>
 
                 {analysisError && (
@@ -738,6 +905,177 @@ function App() {
                     </article>
                   ))}
                 </div>
+              </article>
+            )}
+          </div>
+        )}
+      </section>
+
+      <section className="opportunity-reports">
+        <div className="section-heading">
+          <p className="eyebrow">Opportunity reports</p>
+          <h2>Validated, persisted discoveries</h2>
+          <p>
+            Scores are calculated by deterministic backend factors. Model
+            confidence is displayed separately and is not used as the final score.
+          </p>
+        </div>
+
+        {opportunitiesLoading && (
+          <p className="source-state">Loading opportunities…</p>
+        )}
+
+        {opportunityError && (
+          <p className="error-message" role="alert">
+            {opportunityError}
+          </p>
+        )}
+
+        {!opportunitiesLoading && opportunities.length === 0 && (
+          <p className="source-state">
+            No opportunities saved yet. Select a source and choose
+            {' '}<strong>Discover and save</strong>.
+          </p>
+        )}
+
+        {opportunities.length > 0 && (
+          <div className="opportunity-browser">
+            <nav className="opportunity-list" aria-label="Saved opportunities">
+              {opportunities.map((opportunity) => (
+                <button
+                  type="button"
+                  className={
+                    opportunity.id === selectedOpportunity?.opportunity.id
+                      ? 'opportunity-list-item opportunity-list-item--selected'
+                      : 'opportunity-list-item'
+                  }
+                  onClick={() => selectOpportunity(opportunity.id)}
+                  key={opportunity.id}
+                >
+                  <span>{opportunity.type}</span>
+                  <strong>{opportunity.topic}</strong>
+                  <small>Score {opportunity.score}/100</small>
+                </button>
+              ))}
+            </nav>
+
+            {selectedOpportunity && (
+              <article className="opportunity-detail">
+                <div className="opportunity-report-header">
+                  <span
+                    className={`opportunity-badge opportunity-badge--${selectedOpportunity.opportunity.type}`}
+                  >
+                    {selectedOpportunity.opportunity.type}
+                  </span>
+                  <strong>
+                    Score {selectedOpportunity.opportunity.score}/100
+                  </strong>
+                  <span>
+                    Model confidence{' '}
+                    {Math.round(
+                      selectedOpportunity.opportunity.confidence * 100,
+                    )}%
+                  </span>
+                </div>
+
+                <h3>{selectedOpportunity.opportunity.topic}</h3>
+                <p>{selectedOpportunity.opportunity.problem}</p>
+                {selectedOpportunity.opportunity.problemInferred && (
+                  <p className="inference-label">
+                    Inferred problem — the source did not explicitly request
+                    this solution.
+                  </p>
+                )}
+
+                <div className="report-source">
+                  <strong>Source</strong>
+                  <span>
+                    {selectedOpportunity.source.community} ·{' '}
+                    {selectedOpportunity.source.title}
+                  </span>
+                  <a
+                    href={selectedOpportunity.source.url}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Open original thread
+                  </a>
+                </div>
+
+                {selectedOpportunity.opportunity.matchedProductName && (
+                  <div className="product-match">
+                    <strong>
+                      {selectedOpportunity.opportunity.matchedProductName}
+                    </strong>
+                    <span>
+                      {selectedOpportunity.opportunity.productMatchType
+                        ?.replace(/([A-Z])/g, ' $1')
+                        .toLowerCase()}{' '}
+                      match
+                    </span>
+                    <ul>
+                      {selectedOpportunity.opportunity.matchedCapabilities.map(
+                        (capability) => (
+                          <li key={capability}>{capability}</li>
+                        ),
+                      )}
+                    </ul>
+                  </div>
+                )}
+
+                <div>
+                  <strong>Relevant source comments</strong>
+                  <div className="report-comments">
+                    {selectedOpportunity.relevantComments.length > 0
+                      ? selectedOpportunity.relevantComments.map((comment) => (
+                          <article key={comment.id}>
+                            <p>{comment.body}</p>
+                            <a
+                              href={comment.url}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              Open {comment.externalId}
+                            </a>
+                          </article>
+                        ))
+                      : <p>No comment-level evidence was selected.</p>}
+                  </div>
+                </div>
+
+                <p>{selectedOpportunity.opportunity.explanation}</p>
+
+                <div>
+                  <strong>Limitations</strong>
+                  <ul>
+                    {selectedOpportunity.opportunity.limitations.map(
+                      (limitation) => <li key={limitation}>{limitation}</li>,
+                    )}
+                  </ul>
+                </div>
+
+                <div>
+                  <strong>Score factors</strong>
+                  <div className="score-factors">
+                    {selectedOpportunity.opportunity.scoreFactors.map(
+                      (factor) => (
+                        <div className="score-factor" key={factor.key}>
+                          <span>{factor.label}</span>
+                          <strong>
+                            {factor.points > 0 ? '+' : ''}
+                            {factor.points}
+                          </strong>
+                          <small>{factor.explanation}</small>
+                        </div>
+                      ),
+                    )}
+                  </div>
+                </div>
+
+                <p>
+                  <strong>Suggested action:</strong>{' '}
+                  {selectedOpportunity.opportunity.suggestedAction}
+                </p>
               </article>
             )}
           </div>

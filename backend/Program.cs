@@ -1,8 +1,10 @@
 using ArgosHound.Api.Configuration;
+using ArgosHound.Api.Data;
 using ArgosHound.Api.Services;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Options;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,6 +60,10 @@ builder.Services
             new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
     });
 builder.Services.AddHealthChecks();
+builder.Services.AddDbContext<ArgosHoundDbContext>(options =>
+    options.UseSqlite(
+        builder.Configuration.GetConnectionString("ArgosHound")
+        ?? "Data Source=argoshound.db"));
 builder.Services.AddSingleton<IBuilderProfileStore, InMemoryBuilderProfileStore>();
 builder.Services.AddSingleton<IProductCatalog, DemoProductCatalog>();
 builder.Services.AddSingleton<IProfileImportService, InMemoryProfileImportService>();
@@ -65,6 +71,10 @@ builder.Services.AddSingleton<ISourceDiscussionService, InMemorySourceDiscussion
 builder.Services.AddSingleton<IOpportunityAnalysisPromptBuilder, OpportunityAnalysisPromptBuilder>();
 builder.Services.AddSingleton<OpportunityAnalysisValidator>();
 builder.Services.AddSingleton<ILlmAnalysisProvider, FoundryLlmAnalysisProvider>();
+builder.Services.AddSingleton<IOpportunityScoringService, OpportunityScoringService>();
+builder.Services.AddScoped<IOpportunityRepository, OpportunityRepository>();
+builder.Services.AddScoped<IDiscoveryService, DiscoveryService>();
+builder.Services.AddScoped<IOpportunityReportService, OpportunityReportService>();
 builder.Services.AddSingleton<
     IFoundryAgentConnectivityService,
     FoundryAgentConnectivityService>();
@@ -99,6 +109,13 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider
+        .GetRequiredService<ArgosHoundDbContext>();
+    dbContext.Database.EnsureCreated();
+}
 
 app.UseCors(frontendCorsPolicy);
 

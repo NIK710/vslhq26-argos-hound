@@ -35,6 +35,7 @@ Current backend variables:
 | `ASPNETCORE_URLS` | No | Addresses on which the API listens | The launch profile uses `http://localhost:5080` |
 | `Cors__AllowedOrigins__0` | No | First browser origin allowed by the CORS policy | `http://localhost:5173` |
 | `Cors__AllowedOrigins__1` | No | Optional additional allowed origin | `http://127.0.0.1:5173` |
+| `ConnectionStrings__ArgosHound` | No | SQLite application database | `Data Source=argoshound.db` |
 
 Double underscores map environment variables to nested ASP.NET configuration. For
 example, `Cors__AllowedOrigins__0` maps to `Cors:AllowedOrigins:0`.
@@ -42,6 +43,9 @@ example, `Cors__AllowedOrigins__0` maps to `Cors:AllowedOrigins:0`.
 Multiple CORS origins can be configured by incrementing the final array index. Origins
 must be explicit; do not configure a wildcard when browser credentials or private data
 are introduced.
+
+The backend creates the MVP SQLite schema at startup. Local database files and their
+WAL/SHM sidecars are ignored by Git.
 
 ## AI Configuration
 

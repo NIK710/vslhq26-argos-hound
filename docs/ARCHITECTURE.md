@@ -86,6 +86,13 @@ product IDs, invented capability references, and confidence outside zero to one.
 Only validated analysis is returned to the review UI; this endpoint does not persist an
 opportunity or perform external outreach.
 
+`POST /api/discovery` applies the same validated provider boundary, calculates
+deterministic score factors, and persists an opportunity plus normalized source-evidence
+references in SQLite. Discovery is idempotent per discussion for the MVP: repeating a
+request returns the stored opportunity rather than invoking the model again. The list
+and detail reports are available from `GET /api/opportunities` and
+`GET /api/opportunities/{id}`.
+
 ## 4. Discovery Pipeline
 
 ```text
@@ -416,6 +423,19 @@ score =
 Each factor is normalized before the result is bounded to a documented range. Learning
 context is an aggregate over prior events, decisions, and outcomes; it does not require
 training or fine-tuning a model.
+
+Until history and outcome learning are implemented, the deterministic MVP score is
+bounded to `0..100` and consists of:
+
+- Evidence strength: up to 20 points from validated source references
+- Explicit or inferred problem clarity: 15 or 8 points
+- Product fit: 35 direct, 25 adjacent, or 18 small-extension points
+- Builder fit: 20 to 30 points from available profile signals
+- Actionability: 15 points for a reviewable next action
+- Uncertainty: a penalty of up to 15 points from stated limitations
+
+`NONE` receives score zero. Model confidence is persisted and displayed separately; it
+does not change the deterministic score.
 
 Examples:
 
