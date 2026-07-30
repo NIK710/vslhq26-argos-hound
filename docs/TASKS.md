@@ -78,8 +78,8 @@ stable IDs and URLs.
 
 ### 5. Structured analysis
 
-- [ ] Configure the Azure OpenAI deployment
-- [ ] Configure the Foundry agent or documented fallback model client
+- [x] Configure the Azure OpenAI deployment
+- [x] Configure the Foundry agent or documented fallback model client
 - [ ] Put model calls behind an `ILlmAnalysisProvider` interface
 - [ ] Keep prompts outside application business logic
 - [ ] Delimit source content as untrusted input

@@ -1,6 +1,8 @@
+using ArgosHound.Api.Configuration;
 using ArgosHound.Api.Services;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +11,38 @@ var allowedOrigins = builder.Configuration
     .GetSection("Cors:AllowedOrigins")
     .Get<string[]>()
     ?? ["http://localhost:5173", "http://127.0.0.1:5173"];
+
+builder.Services
+    .AddOptions<AzureOpenAIOptions>()
+    .Bind(builder.Configuration.GetSection(AzureOpenAIOptions.SectionName))
+    .Validate(
+        options =>
+            Uri.TryCreate(options.Endpoint, UriKind.Absolute, out var endpoint)
+            && endpoint.Scheme == Uri.UriSchemeHttps,
+        "AzureOpenAI:Endpoint must be an absolute HTTPS URL.")
+    .Validate(
+        options => !string.IsNullOrWhiteSpace(options.DeploymentName),
+        "AzureOpenAI:DeploymentName is required.")
+    .Validate(
+        options => !string.IsNullOrWhiteSpace(options.ApiKey),
+        "AzureOpenAI:ApiKey is required.")
+    .ValidateOnStart();
+
+builder.Services
+    .AddOptions<FoundryOptions>()
+    .Bind(builder.Configuration.GetSection(FoundryOptions.SectionName))
+    .Validate(
+        options =>
+            Uri.TryCreate(options.ProjectEndpoint, UriKind.Absolute, out var endpoint)
+            && endpoint.Scheme == Uri.UriSchemeHttps,
+        "Foundry:ProjectEndpoint must be an absolute HTTPS URL.")
+    .Validate(
+        options => !string.IsNullOrWhiteSpace(options.AgentName),
+        "Foundry:AgentName is required.")
+    .Validate(
+        options => !string.IsNullOrWhiteSpace(options.AgentVersion),
+        "Foundry:AgentVersion is required.")
+    .ValidateOnStart();
 
 builder.Services
     .AddControllers()
@@ -21,6 +55,28 @@ builder.Services.AddHealthChecks();
 builder.Services.AddSingleton<IBuilderProfileStore, InMemoryBuilderProfileStore>();
 builder.Services.AddSingleton<IProfileImportService, InMemoryProfileImportService>();
 builder.Services.AddSingleton<ISourceDiscussionService, InMemorySourceDiscussionService>();
+builder.Services.AddSingleton<
+    IFoundryAgentConnectivityService,
+    FoundryAgentConnectivityService>();
+builder.Services.AddHttpClient<
+    IAzureOpenAIConnectivityService,
+    AzureOpenAIConnectivityService>((services, client) =>
+    {
+        var options = services
+            .GetRequiredService<IOptions<AzureOpenAIOptions>>()
+            .Value;
+
+        var configuredEndpoint = options.Endpoint.TrimEnd('/');
+        var v1Endpoint = configuredEndpoint.EndsWith(
+            "/openai/v1",
+            StringComparison.OrdinalIgnoreCase)
+            ? $"{configuredEndpoint}/"
+            : $"{configuredEndpoint}/openai/v1/";
+
+        client.BaseAddress = new Uri(v1Endpoint);
+        client.DefaultRequestHeaders.Add("api-key", options.ApiKey);
+        client.Timeout = TimeSpan.FromSeconds(30);
+    });
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(frontendCorsPolicy, policy =>

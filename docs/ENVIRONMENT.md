@@ -43,10 +43,10 @@ Multiple CORS origins can be configured by incrementing the final array index. O
 must be explicit; do not configure a wildcard when browser credentials or private data
 are introduced.
 
-## Planned AI Configuration
+## AI Configuration
 
-These settings are documented now but are not required until the structured-analysis
-integration is implemented:
+Azure OpenAI provides the deployed model. The Foundry project provides the versioned
+ArgosHound agent that uses that model.
 
 | Variable | Secret | Purpose |
 |---|---:|---|
@@ -54,10 +54,25 @@ integration is implemented:
 | `AzureOpenAI__DeploymentName` | No | Model deployment used for analysis |
 | `AzureOpenAI__ApiKey` | Yes | Local API credential when managed identity is unavailable |
 | `Foundry__ProjectEndpoint` | No | Microsoft Foundry project endpoint |
+| `Foundry__AgentName` | No | Versioned prompt-agent asset name |
+| `Foundry__AgentVersion` | No | Prompt-agent version invoked by the backend |
 
 Prefer managed identity in deployed environments. Never commit a real API key. Local
 credentials should be supplied through shell environment variables, .NET user secrets,
 or the deployment platform's secret store.
+
+The Foundry SDK uses Microsoft Entra authentication rather than the Azure OpenAI API
+key. For local development, install the Azure CLI and authenticate before starting the
+backend:
+
+```bash
+az login
+az account show
+```
+
+The signed-in identity must have permission to invoke agents in the Foundry project.
+In Development, `GET /api/health/foundry-agent` performs a small live request against
+the configured agent. The endpoint is unavailable outside Development.
 
 ## Local Development
 
