@@ -11,6 +11,10 @@ type ProposedBuilderProfile = {
   effortPreferences: string[]
 }
 
+type BuilderProfile = ProposedBuilderProfile & {
+  id: string
+}
+
 type ProfileFieldChange = {
   field: string
   currentValues: string[]
@@ -196,11 +200,6 @@ type CreateCampaignLinkResponse = {
   redirectUrl: string
 }
 
-type BackendStatus =
-  | { state: 'checking'; message: string }
-  | { state: 'connected'; message: string }
-  | { state: 'error'; message: string }
-
 const apiBaseUrl =
   import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5080'
 
@@ -224,11 +223,10 @@ async function readApiError(response: Response) {
   }
 }
 
+const wait = (milliseconds: number) =>
+  new Promise((resolve) => window.setTimeout(resolve, milliseconds))
+
 function App() {
-  const [backendStatus, setBackendStatus] = useState<BackendStatus>({
-    state: 'checking',
-    message: 'Checking backend connection…',
-  })
   const [provider, setProvider] =
     useState<ProfileImport['provider']>('chatGpt')
   const [content, setContent] = useState('')
@@ -264,41 +262,12 @@ function App() {
   const [activityNote, setActivityNote] = useState('')
   const [outcomeType, setOutcomeType] = useState('learningValue')
   const [learningSummary, setLearningSummary] = useState<LearningSummary | null>(null)
-
-  useEffect(() => {
-    const controller = new AbortController()
-
-    async function checkBackend() {
-      try {
-        const response = await fetch(`${apiBaseUrl}/api/health`, {
-          signal: controller.signal,
-        })
-
-        if (!response.ok) {
-          throw new Error(`Health check returned ${response.status}`)
-        }
-
-        const message = await response.text()
-        setBackendStatus({ state: 'connected', message })
-      } catch (error) {
-        if (error instanceof DOMException && error.name === 'AbortError') {
-          return
-        }
-
-        setBackendStatus({
-          state: 'error',
-          message:
-            error instanceof Error
-              ? error.message
-              : 'Unable to reach the backend',
-        })
-      }
-    }
-
-    void checkBackend()
-
-    return () => controller.abort()
-  }, [])
+  const [builderProfile, setBuilderProfile] = useState<BuilderProfile | null>(null)
+  const [profileError, setProfileError] = useState<string | null>(null)
+  const [opportunityFilter, setOpportunityFilter] =
+    useState<'all' | 'product' | 'builder'>('all')
+  const [profilePrompt, setProfilePrompt] = useState('')
+  const [promptCopied, setPromptCopied] = useState(false)
 
   async function loadLearningSummary() {
     const response = await fetch(`${apiBaseUrl}/api/learning/summary`)
@@ -309,6 +278,31 @@ function App() {
 
   useEffect(() => {
     void loadLearningSummary()
+  }, [])
+
+  useEffect(() => {
+    async function loadBuilder() {
+      try {
+        const response = await fetch(`${apiBaseUrl}/api/builder`)
+        if (!response.ok) throw new Error(await readApiError(response))
+        setBuilderProfile((await response.json()) as BuilderProfile)
+      } catch (error) {
+        setProfileError(
+          error instanceof Error ? error.message : 'Unable to load builder profile',
+        )
+      }
+    }
+    void loadBuilder()
+  }, [])
+
+  useEffect(() => {
+    async function loadProfilePrompt() {
+      const response = await fetch(
+        `${apiBaseUrl}/api/builder/profile-export-prompt`,
+      )
+      if (response.ok) setProfilePrompt(await response.text())
+    }
+    void loadProfilePrompt()
   }, [])
 
   useEffect(() => {
@@ -467,10 +461,12 @@ function App() {
         throw new Error(await readApiError(response))
       }
 
+      const result = await response.json()
       setProfileImport({
         ...profileImport,
         status: action === 'approve' ? 'approved' : 'rejected',
       })
+      if (action === 'approve') setBuilderProfile(result as BuilderProfile)
     } catch (error) {
       setImportError(
         error instanceof Error ? error.message : `Unable to ${action} import`,
@@ -533,10 +529,13 @@ function App() {
     setIsAnalyzing(true)
 
     try {
-      const response = await fetch(
-        `${apiBaseUrl}/api/analysis/discussions/${selectedDiscussion.id}`,
-        { method: 'POST' },
-      )
+      const [response] = await Promise.all([
+        fetch(
+          `${apiBaseUrl}/api/analysis/discussions/${selectedDiscussion.id}`,
+          { method: 'POST' },
+        ),
+        wait(1000),
+      ])
 
       if (!response.ok) {
         throw new Error(await readApiError(response))
@@ -563,11 +562,14 @@ function App() {
     setIsDiscovering(true)
 
     try {
-      const response = await fetch(`${apiBaseUrl}/api/discovery`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ discussionId: selectedDiscussion.id }),
-      })
+      const [response] = await Promise.all([
+        fetch(`${apiBaseUrl}/api/discovery`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ discussionId: selectedDiscussion.id }),
+        }),
+        wait(1000),
+      ])
 
       if (!response.ok) {
         throw new Error(await readApiError(response))
@@ -725,28 +727,33 @@ function App() {
     await loadLearningSummary()
   }
 
+  const filteredOpportunities = opportunities.filter((opportunity) =>
+    opportunityFilter === 'all' || opportunity.type === opportunityFilter,
+  )
+
   return (
     <main className="app-shell">
       <p className="eyebrow">ArgosHound</p>
       <h1>Opportunity intelligence for builders</h1>
       <p className="intro">
-        Scout public conversations for product and builder opportunities.
+        ArgosHound turns evidence from public discussions into explainable
+        product and project opportunities tailored to one builder.
       </p>
 
-      <section className="connection-card" aria-live="polite">
-        <span
-          className={`status-dot status-dot--${backendStatus.state}`}
-          aria-hidden="true"
-        />
-        <div>
-          <h2>Backend connection</h2>
-          <p>
-            {backendStatus.state === 'connected'
-              ? `Connected: ${backendStatus.message}`
-              : backendStatus.message}
-          </p>
-          <code>{apiBaseUrl}/api/health</code>
+      <section className="builder-summary">
+        <div className="section-heading">
+          <p className="eyebrow">Active builder</p>
+          <h2>{builderProfile?.name ?? 'Loading profile…'}</h2>
         </div>
+        {profileError && <p className="error-message" role="alert">{profileError}</p>}
+        {builderProfile && (
+          <div className="profile-summary-grid">
+            <p><strong>Location</strong><span>{builderProfile.location ?? 'Flexible'}</span></p>
+            <p><strong>Skills</strong><span>{builderProfile.currentSkills.join(', ')}</span></p>
+            <p><strong>Goals</strong><span>{builderProfile.learningGoals.join(', ')}</span></p>
+            <p><strong>Interests</strong><span>{builderProfile.interests.join(', ')}</span></p>
+          </div>
+        )}
       </section>
 
       <section className="profile-import">
@@ -759,6 +766,34 @@ function App() {
             approve the preview.
           </p>
         </div>
+
+        <details className="prompt-panel">
+          <summary>View profile export prompt</summary>
+          <p>
+            Copy this into ChatGPT, Claude, or another assistant.
+          </p>
+          <div className="prompt-canvas">
+            <pre>{profilePrompt || 'Loading prompt…'}</pre>
+            <button
+              type="button"
+              className={
+                promptCopied ? 'prompt-copy prompt-copy--copied' : 'prompt-copy'
+              }
+              aria-label={promptCopied ? 'Prompt copied' : 'Copy prompt'}
+              title={promptCopied ? 'Copied' : 'Copy prompt'}
+              disabled={!profilePrompt}
+              onClick={async () => {
+                await navigator.clipboard.writeText(profilePrompt)
+                setPromptCopied(true)
+                window.setTimeout(() => setPromptCopied(false), 2000)
+              }}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M8 7V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2M5 8h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2Z" />
+              </svg>
+            </button>
+          </div>
+        </details>
 
         {!profileImport && (
           <form className="import-form" onSubmit={createImport}>
@@ -1115,6 +1150,28 @@ function App() {
           </p>
         </div>
 
+        <div className="feed-filters" aria-label="Filter opportunities">
+          {(['all', 'product', 'builder'] as const).map((filter) => (
+            <button
+              type="button"
+              className={opportunityFilter === filter ? 'filter-active' : 'secondary'}
+              aria-pressed={opportunityFilter === filter}
+              onClick={() => {
+                setOpportunityFilter(filter)
+                if (
+                  filter !== 'all'
+                  && selectedOpportunity?.opportunity.type !== filter
+                ) {
+                  setSelectedOpportunity(null)
+                }
+              }}
+              key={filter}
+            >
+              {filter}
+            </button>
+          ))}
+        </div>
+
         {opportunitiesLoading && (
           <p className="source-state">Loading opportunities…</p>
         )}
@@ -1132,10 +1189,15 @@ function App() {
           </p>
         )}
 
-        {opportunities.length > 0 && (
+        {!opportunitiesLoading && opportunities.length > 0
+          && filteredOpportunities.length === 0 && (
+            <p className="source-state">No {opportunityFilter} opportunities yet.</p>
+          )}
+
+        {filteredOpportunities.length > 0 && (
           <div className="opportunity-browser">
             <nav className="opportunity-list" aria-label="Saved opportunities">
-              {opportunities.map((opportunity) => (
+              {filteredOpportunities.map((opportunity) => (
                 <button
                   type="button"
                   className={
@@ -1148,7 +1210,9 @@ function App() {
                 >
                   <span>{opportunity.type}</span>
                   <strong>{opportunity.topic}</strong>
+                  <p>{opportunity.problem}</p>
                   <small>Score {opportunity.score}/100</small>
+                  <small>{opportunity.suggestedAction}</small>
                 </button>
               ))}
             </nav>
@@ -1269,6 +1333,15 @@ function App() {
                       (limitation) => <li key={limitation}>{limitation}</li>,
                     )}
                   </ul>
+                </div>
+
+                <div className="risk-note">
+                  <strong>Privacy and outreach boundary</strong>
+                  <p>
+                    Source evidence supports a recommendation, not a verified
+                    person profile. Review community rules and approve any
+                    outreach yourself; ArgosHound sends nothing automatically.
+                  </p>
                 </div>
 
                 <div>

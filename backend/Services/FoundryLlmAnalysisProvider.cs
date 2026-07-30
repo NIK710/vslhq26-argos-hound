@@ -79,6 +79,12 @@ public sealed class FoundryLlmAnalysisProvider(
                     "The backend could not authenticate with Foundry.",
                     exception);
             }
+            catch (AggregateException exception)
+            {
+                throw new LlmAnalysisUnavailableException(
+                    "The backend could not connect to Foundry.",
+                    exception);
+            }
 
             await Task.Delay(
                 TimeSpan.FromMilliseconds(300 * attempt),

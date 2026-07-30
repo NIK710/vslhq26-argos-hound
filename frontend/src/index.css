@@ -67,10 +67,13 @@ h2 {
 
 h1 {
   font-size: 56px;
+  line-height: 1.08;
   letter-spacing: -1.68px;
   margin: 32px 0;
+  text-wrap: balance;
   @media (max-width: 1024px) {
     font-size: 36px;
+    line-height: 1.12;
     margin: 20px 0;
   }
 }

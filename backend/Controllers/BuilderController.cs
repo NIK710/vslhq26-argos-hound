@@ -9,11 +9,25 @@ namespace ArgosHound.Api.Controllers;
 [Route("api/builder")]
 public sealed class BuilderController(
     IBuilderProfileStore builderProfileStore,
-    IProfileImportService profileImportService) : ControllerBase
+    IProfileImportService profileImportService,
+    IHostEnvironment environment) : ControllerBase
 {
     [HttpGet]
     public ActionResult<BuilderProfile> GetBuilder() =>
         Ok(builderProfileStore.Get());
+
+    [HttpGet("profile-export-prompt")]
+    public async Task<IActionResult> GetProfileExportPrompt(
+        CancellationToken cancellationToken)
+    {
+        var path = Path.Combine(
+            environment.ContentRootPath,
+            "Prompts",
+            "profile-import.md");
+        return Content(
+            await System.IO.File.ReadAllTextAsync(path, cancellationToken),
+            "text/plain");
+    }
 
     [HttpPost("profile-imports")]
     public ActionResult<ProfileImport> CreateImport(CreateProfileImportRequest request)

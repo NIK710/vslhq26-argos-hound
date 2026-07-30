@@ -162,17 +162,17 @@ stable IDs and URLs.
 
 ### 11. Core UI
 
-- [ ] Add a concise product explanation
-- [ ] Add the builder-profile summary
-- [ ] Add opportunity-feed filters for `PRODUCT` and `BUILDER`
-- [ ] Create an opportunity card with type, problem, score, and suggested action
-- [ ] Create an opportunity detail view
-- [ ] Link to the original thread and exact comments
-- [ ] Show product or capability match
-- [ ] Show confidence separately from final score
-- [ ] Show limitations and privacy/outreach risk
-- [ ] Add loading, empty, and error states
-- [ ] Make the primary demo view responsive
+- [x] Add a concise product explanation
+- [x] Add the builder-profile summary
+- [x] Add opportunity-feed filters for `PRODUCT` and `BUILDER`
+- [x] Create an opportunity card with type, problem, score, and suggested action
+- [x] Create an opportunity detail view
+- [x] Link to the original thread and exact comments
+- [x] Show product or capability match
+- [x] Show confidence separately from final score
+- [x] Show limitations and privacy/outreach risk
+- [x] Add loading, empty, and error states
+- [x] Make the primary demo view responsive
 
 ### 12. Reliability checks
 

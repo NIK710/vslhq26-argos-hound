@@ -18,19 +18,31 @@
   font-size: 20px;
 }
 
-.connection-card {
-  display: flex;
-  gap: 16px;
-  margin-top: 48px;
-  padding: 24px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--social-bg);
-  box-shadow: var(--shadow);
-}
-
 .profile-import {
   margin-top: 72px;
+}
+
+.builder-summary {
+  margin-top: 48px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.profile-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.profile-summary-grid p {
+  display: grid;
+  gap: 4px;
+}
+
+.profile-summary-grid span {
+  font-size: 14px;
 }
 
 .source-evidence {
@@ -86,6 +98,83 @@
   padding: 24px;
   border: 1px solid var(--border);
   border-radius: 12px;
+}
+
+.prompt-panel {
+  margin-top: 24px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.prompt-panel summary {
+  color: var(--text-h);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.prompt-panel p {
+  margin-top: 12px;
+}
+
+.prompt-canvas {
+  position: relative;
+}
+
+.prompt-panel pre {
+  max-height: 360px;
+  margin: 14px 0;
+  padding: 48px 14px 14px;
+  overflow: auto;
+  white-space: pre-wrap;
+  border-radius: 8px;
+  color: var(--text-h);
+  background: var(--code-bg);
+  font: 13px/1.5 var(--mono);
+}
+
+button.prompt-copy {
+  position: absolute;
+  top: 24px;
+  right: 5%;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  padding: 7px;
+  place-items: center;
+  color: var(--text-h);
+  background: var(--bg);
+  border-color: var(--border);
+  box-shadow: 0 2px 5px rgb(0 0 0 / 12%);
+  transition:
+    transform 100ms ease,
+    background-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+button.prompt-copy:hover {
+  background: var(--accent-bg);
+  box-shadow: 0 4px 8px rgb(0 0 0 / 16%);
+}
+
+button.prompt-copy:active {
+  transform: translateY(1px) scale(0.9);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 12%);
+}
+
+button.prompt-copy--copied {
+  color: white;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.prompt-copy svg {
+  width: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
 }
 
 label {
@@ -300,6 +389,18 @@ button.source-list-item--selected {
   font-size: 12px;
 }
 
+.analysis-actions button {
+  box-shadow: 0 2px 5px rgb(0 0 0 / 12%);
+  transition:
+    transform 100ms ease,
+    box-shadow 100ms ease;
+}
+
+.analysis-actions button:active {
+  transform: translateY(2px) scale(0.96);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 10%);
+}
+
 .analysis-result {
   display: grid;
   gap: 18px;
@@ -406,6 +507,12 @@ button.opportunity-list-item {
   border-color: var(--border);
 }
 
+.opportunity-list-item p {
+  margin: 0;
+  font-size: 13px;
+  text-transform: none;
+}
+
 .opportunity-list-item strong {
   color: var(--text-h);
 }
@@ -417,6 +524,23 @@ button.opportunity-list-item {
 button.opportunity-list-item--selected {
   border-color: var(--accent);
   background: var(--accent-bg);
+}
+
+.feed-filters {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.feed-filters button {
+  text-transform: capitalize;
+}
+
+.risk-note {
+  padding: 14px;
+  border-left: 3px solid #f59e0b;
+  background: #fef3c7;
+  color: #78350f;
 }
 
 .opportunity-detail {
@@ -576,34 +700,14 @@ button.opportunity-list-item--selected {
   margin-top: 8px;
 }
 
-.connection-card h2 {
-  margin-bottom: 6px;
-}
-
-.connection-card code {
-  margin-top: 16px;
-}
-
-.status-dot {
-  width: 12px;
-  height: 12px;
-  margin-top: 8px;
-  flex: 0 0 auto;
-  border-radius: 50%;
-  background: #f59e0b;
-}
-
-.status-dot--connected {
-  background: #22c55e;
-}
-
-.status-dot--error {
-  background: #ef4444;
-}
-
 @media (max-width: 640px) {
   .app-shell {
+    width: min(100% - 24px, 720px);
     padding: 56px 0;
+  }
+
+  .profile-summary-grid {
+    grid-template-columns: 1fr;
   }
 
   .change-row {
@@ -620,5 +724,22 @@ button.opportunity-list-item--selected {
 
   .campaign-form {
     grid-template-columns: 1fr;
+  }
+
+  .opportunity-detail,
+  .discussion-detail,
+  .review-panel,
+  .import-form {
+    padding: 16px;
+  }
+
+  .actions button,
+  .analysis-actions button {
+    flex: 1 1 auto;
+  }
+
+  code {
+    max-width: 100%;
+    overflow-wrap: anywhere;
   }
 }

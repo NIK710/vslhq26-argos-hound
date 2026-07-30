@@ -27,6 +27,7 @@ public sealed class FoundryAgentHealthController(
         catch (Exception exception) when (
             exception is AuthenticationFailedException
             or RequestFailedException
+            or AggregateException
             or InvalidOperationException)
         {
             return Problem(

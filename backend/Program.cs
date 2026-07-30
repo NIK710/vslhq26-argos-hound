@@ -7,6 +7,8 @@ using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+var useDemoAnalysis =
+    builder.Configuration.GetValue<bool>("Analysis:UseDemoProvider");
 
 const string frontendCorsPolicy = "Frontend";
 var allowedOrigins = builder.Configuration
@@ -19,14 +21,16 @@ builder.Services
     .Bind(builder.Configuration.GetSection(AzureOpenAIOptions.SectionName))
     .Validate(
         options =>
+            useDemoAnalysis
+            ||
             Uri.TryCreate(options.Endpoint, UriKind.Absolute, out var endpoint)
             && endpoint.Scheme == Uri.UriSchemeHttps,
         "AzureOpenAI:Endpoint must be an absolute HTTPS URL.")
     .Validate(
-        options => !string.IsNullOrWhiteSpace(options.DeploymentName),
+        options => useDemoAnalysis || !string.IsNullOrWhiteSpace(options.DeploymentName),
         "AzureOpenAI:DeploymentName is required.")
     .Validate(
-        options => !string.IsNullOrWhiteSpace(options.ApiKey),
+        options => useDemoAnalysis || !string.IsNullOrWhiteSpace(options.ApiKey),
         "AzureOpenAI:ApiKey is required.")
     .ValidateOnStart();
 
@@ -35,14 +39,16 @@ builder.Services
     .Bind(builder.Configuration.GetSection(FoundryOptions.SectionName))
     .Validate(
         options =>
+            useDemoAnalysis
+            ||
             Uri.TryCreate(options.ProjectEndpoint, UriKind.Absolute, out var endpoint)
             && endpoint.Scheme == Uri.UriSchemeHttps,
         "Foundry:ProjectEndpoint must be an absolute HTTPS URL.")
     .Validate(
-        options => !string.IsNullOrWhiteSpace(options.AgentName),
+        options => useDemoAnalysis || !string.IsNullOrWhiteSpace(options.AgentName),
         "Foundry:AgentName is required.")
     .Validate(
-        options => !string.IsNullOrWhiteSpace(options.AgentVersion),
+        options => useDemoAnalysis || !string.IsNullOrWhiteSpace(options.AgentVersion),
         "Foundry:AgentVersion is required.")
     .Validate(
         options => options.RequestTimeoutSeconds is >= 5 and <= 120,
@@ -90,7 +96,14 @@ builder.Services.AddSingleton<IProfileImportService, InMemoryProfileImportServic
 builder.Services.AddSingleton<ISourceDiscussionService, InMemorySourceDiscussionService>();
 builder.Services.AddSingleton<IOpportunityAnalysisPromptBuilder, OpportunityAnalysisPromptBuilder>();
 builder.Services.AddSingleton<OpportunityAnalysisValidator>();
-builder.Services.AddSingleton<ILlmAnalysisProvider, FoundryLlmAnalysisProvider>();
+if (useDemoAnalysis)
+{
+    builder.Services.AddSingleton<ILlmAnalysisProvider, DemoLlmAnalysisProvider>();
+}
+else
+{
+    builder.Services.AddSingleton<ILlmAnalysisProvider, FoundryLlmAnalysisProvider>();
+}
 builder.Services.AddSingleton<IOpportunityScoringService, OpportunityScoringService>();
 builder.Services.AddScoped<IOpportunityRepository, OpportunityRepository>();
 builder.Services.AddScoped<IDiscoveryService, DiscoveryService>();
