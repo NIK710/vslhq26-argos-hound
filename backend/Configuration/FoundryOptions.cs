@@ -9,4 +9,8 @@ public sealed class FoundryOptions
     public string AgentName { get; init; } = string.Empty;
 
     public string AgentVersion { get; init; } = string.Empty;
+
+    public int RequestTimeoutSeconds { get; init; } = 45;
+
+    public int MaxAttempts { get; init; } = 3;
 }

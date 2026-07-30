@@ -80,17 +80,17 @@ stable IDs and URLs.
 
 - [x] Configure the Azure OpenAI deployment
 - [x] Configure the Foundry agent or documented fallback model client
-- [ ] Put model calls behind an `ILlmAnalysisProvider` interface
-- [ ] Keep prompts outside application business logic
-- [ ] Delimit source content as untrusted input
-- [ ] Define the structured analysis schema
-- [ ] Extract problem, topic, sentiment, and evidence references
-- [ ] Return `PRODUCT`, `BUILDER`, or `NONE`
-- [ ] Return product match type only for product opportunities
-- [ ] Reference product IDs and capabilities from the supplied catalog
-- [ ] Include limitations, explanation, suggested action, and confidence
-- [ ] Reject malformed output and unknown evidence or product IDs
-- [ ] Add timeout, retry, and user-visible failure behavior
+- [x] Put model calls behind an `ILlmAnalysisProvider` interface
+- [x] Keep prompts outside application business logic
+- [x] Delimit source content as untrusted input
+- [x] Define the structured analysis schema
+- [x] Extract problem, topic, sentiment, and evidence references
+- [x] Return `PRODUCT`, `BUILDER`, or `NONE`
+- [x] Return product match type only for product opportunities
+- [x] Reference product IDs and capabilities from the supplied catalog
+- [x] Include limitations, explanation, suggested action, and confidence
+- [x] Reject malformed output and unknown evidence or product IDs
+- [x] Add timeout, retry, and user-visible failure behavior
 
 ### 6. Product-opportunity flow
 

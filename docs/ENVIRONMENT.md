@@ -56,6 +56,8 @@ ArgosHound agent that uses that model.
 | `Foundry__ProjectEndpoint` | No | Microsoft Foundry project endpoint |
 | `Foundry__AgentName` | No | Versioned prompt-agent asset name |
 | `Foundry__AgentVersion` | No | Prompt-agent version invoked by the backend |
+| `Foundry__RequestTimeoutSeconds` | No | Per-attempt analysis timeout, from 5 to 120 seconds |
+| `Foundry__MaxAttempts` | No | Maximum analysis attempts, from 1 to 3 |
 
 Prefer managed identity in deployed environments. Never commit a real API key. Local
 credentials should be supplied through shell environment variables, .NET user secrets,

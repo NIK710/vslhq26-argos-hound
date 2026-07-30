@@ -50,6 +50,33 @@ type SourceDiscussion = {
   comments: SourceComment[]
 }
 
+type OpportunityAnalysis = {
+  problem: {
+    summary: string
+    inferred: boolean
+  }
+  topic: string
+  sentiment: 'negative' | 'mixed' | 'neutral' | 'positive'
+  evidenceReferences: string[]
+  opportunityType: 'product' | 'builder' | 'none'
+  productMatch: {
+    productId: string
+    productName: string
+    matchType: 'direct' | 'adjacent' | 'smallExtension'
+    matchedCapabilities: string[]
+  } | null
+  limitations: string[]
+  explanation: string
+  suggestedAction: string
+  confidence: number
+}
+
+type AnalyzeDiscussionResponse = {
+  discussionId: string
+  analysis: OpportunityAnalysis
+  analyzedAt: string
+}
+
 type BackendStatus =
   | { state: 'checking'; message: string }
   | { state: 'connected'; message: string }
@@ -96,6 +123,10 @@ function App() {
   >(null)
   const [sourceError, setSourceError] = useState<string | null>(null)
   const [sourcesLoading, setSourcesLoading] = useState(true)
+  const [analysisResult, setAnalysisResult] =
+    useState<AnalyzeDiscussionResponse | null>(null)
+  const [analysisError, setAnalysisError] = useState<string | null>(null)
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -312,6 +343,37 @@ function App() {
   const selectedDiscussion =
     discussions.find(({ id }) => id === selectedDiscussionId) ?? null
 
+  async function analyzeSelectedDiscussion() {
+    if (!selectedDiscussion) return
+
+    setAnalysisError(null)
+    setAnalysisResult(null)
+    setIsAnalyzing(true)
+
+    try {
+      const response = await fetch(
+        `${apiBaseUrl}/api/analysis/discussions/${selectedDiscussion.id}`,
+        { method: 'POST' },
+      )
+
+      if (!response.ok) {
+        throw new Error(await readApiError(response))
+      }
+
+      setAnalysisResult(
+        (await response.json()) as AnalyzeDiscussionResponse,
+      )
+    } catch (error) {
+      setAnalysisError(
+        error instanceof Error
+          ? error.message
+          : 'Unable to analyze this discussion',
+      )
+    } finally {
+      setIsAnalyzing(false)
+    }
+  }
+
   return (
     <main className="app-shell">
       <p className="eyebrow">ArgosHound</p>
@@ -518,7 +580,11 @@ function App() {
                       ? 'source-list-item source-list-item--selected'
                       : 'source-list-item'
                   }
-                  onClick={() => setSelectedDiscussionId(discussion.id)}
+                  onClick={() => {
+                    setSelectedDiscussionId(discussion.id)
+                    setAnalysisResult(null)
+                    setAnalysisError(null)
+                  }}
                   key={discussion.id}
                 >
                   <span>{discussion.community}</span>
@@ -554,6 +620,102 @@ function App() {
                 >
                   Open original thread
                 </a>
+
+                <div className="analysis-actions">
+                  <button
+                    type="button"
+                    onClick={analyzeSelectedDiscussion}
+                    disabled={isAnalyzing}
+                  >
+                    {isAnalyzing ? 'Analyzing with Foundry…' : 'Analyze opportunity'}
+                  </button>
+                  <span>
+                    Review only — this does not save an opportunity or contact anyone.
+                  </span>
+                </div>
+
+                {analysisError && (
+                  <p className="error-message" role="alert">
+                    {analysisError}
+                  </p>
+                )}
+
+                {analysisResult?.discussionId === selectedDiscussion.id && (
+                  <section className="analysis-result" aria-live="polite">
+                    <div className="analysis-result__header">
+                      <span
+                        className={`opportunity-badge opportunity-badge--${analysisResult.analysis.opportunityType}`}
+                      >
+                        {analysisResult.analysis.opportunityType}
+                      </span>
+                      <span>
+                        {Math.round(analysisResult.analysis.confidence * 100)}%
+                        {' '}confidence
+                      </span>
+                      <span>{analysisResult.analysis.sentiment} sentiment</span>
+                    </div>
+
+                    <h4>{analysisResult.analysis.topic}</h4>
+                    <p>
+                      <strong>Problem:</strong>{' '}
+                      {analysisResult.analysis.problem.summary}
+                    </p>
+                    {analysisResult.analysis.problem.inferred && (
+                      <p className="inference-label">
+                        Inferred need — not explicitly requested by the source.
+                      </p>
+                    )}
+
+                    <p>{analysisResult.analysis.explanation}</p>
+
+                    {analysisResult.analysis.productMatch && (
+                      <div className="product-match">
+                        <strong>
+                          {analysisResult.analysis.productMatch.productName}
+                        </strong>
+                        <span>
+                          {analysisResult.analysis.productMatch.matchType
+                            .replace(/([A-Z])/g, ' $1')
+                            .toLowerCase()}{' '}
+                          match
+                        </span>
+                        <ul>
+                          {analysisResult.analysis.productMatch
+                            .matchedCapabilities.map((capability) => (
+                              <li key={capability}>{capability}</li>
+                            ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    <div>
+                      <strong>Evidence references</strong>
+                      <div className="evidence-references">
+                        {analysisResult.analysis.evidenceReferences.length > 0
+                          ? analysisResult.analysis.evidenceReferences.map(
+                              (reference) => (
+                                <code key={reference}>{reference}</code>
+                              ),
+                            )
+                          : <span>No problem evidence identified</span>}
+                      </div>
+                    </div>
+
+                    <div>
+                      <strong>Limitations</strong>
+                      <ul>
+                        {analysisResult.analysis.limitations.map((limitation) => (
+                          <li key={limitation}>{limitation}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <p>
+                      <strong>Suggested action:</strong>{' '}
+                      {analysisResult.analysis.suggestedAction}
+                    </p>
+                  </section>
+                )}
 
                 <div className="comment-list">
                   <h4>Relevant comments</h4>

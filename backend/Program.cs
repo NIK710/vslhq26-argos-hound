@@ -42,6 +42,12 @@ builder.Services
     .Validate(
         options => !string.IsNullOrWhiteSpace(options.AgentVersion),
         "Foundry:AgentVersion is required.")
+    .Validate(
+        options => options.RequestTimeoutSeconds is >= 5 and <= 120,
+        "Foundry:RequestTimeoutSeconds must be between 5 and 120.")
+    .Validate(
+        options => options.MaxAttempts is >= 1 and <= 3,
+        "Foundry:MaxAttempts must be between 1 and 3.")
     .ValidateOnStart();
 
 builder.Services
@@ -53,8 +59,12 @@ builder.Services
     });
 builder.Services.AddHealthChecks();
 builder.Services.AddSingleton<IBuilderProfileStore, InMemoryBuilderProfileStore>();
+builder.Services.AddSingleton<IProductCatalog, DemoProductCatalog>();
 builder.Services.AddSingleton<IProfileImportService, InMemoryProfileImportService>();
 builder.Services.AddSingleton<ISourceDiscussionService, InMemorySourceDiscussionService>();
+builder.Services.AddSingleton<IOpportunityAnalysisPromptBuilder, OpportunityAnalysisPromptBuilder>();
+builder.Services.AddSingleton<OpportunityAnalysisValidator>();
+builder.Services.AddSingleton<ILlmAnalysisProvider, FoundryLlmAnalysisProvider>();
 builder.Services.AddSingleton<
     IFoundryAgentConnectivityService,
     FoundryAgentConnectivityService>();

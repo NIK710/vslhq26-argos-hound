@@ -70,6 +70,22 @@ available through model APIs or identity sign-in.
 The backend owns validation, persistence, scoring, policy boundaries, and all external
 side effects. The model analyzes supplied content and returns structured proposals.
 
+### Structured-analysis boundary
+
+`POST /api/analysis/discussions/{discussionId}` is the non-persisting analysis preview
+used before discovery creates an opportunity. The controller supplies the current
+Builder Profile, product catalog, and selected discussion to `ILlmAnalysisProvider`.
+The Foundry implementation invokes the pinned prompt-agent version with a per-attempt
+timeout and bounded transient retries.
+
+Prompt templates and the JSON schema live outside application business logic under
+`backend/Prompts` and `backend/Schemas`. Source content is serialized inside an explicit
+untrusted-input boundary. After the model responds, backend validation rejects malformed
+JSON, unsupported enums, invalid product-match combinations, unknown evidence or
+product IDs, invented capability references, and confidence outside zero to one.
+Only validated analysis is returned to the review UI; this endpoint does not persist an
+opportunity or perform external outreach.
+
 ## 4. Discovery Pipeline
 
 ```text

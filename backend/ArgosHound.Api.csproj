@@ -18,4 +18,9 @@
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.0" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="Prompts\**\*" CopyToOutputDirectory="PreserveNewest" />
+    <Content Update="Schemas\**\*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

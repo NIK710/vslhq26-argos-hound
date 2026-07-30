@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "problem",
+    "topic",
+    "sentiment",
+    "evidenceReferences",
+    "opportunityType",
+    "productMatch",
+    "limitations",
+    "explanation",
+    "suggestedAction",
+    "confidence"
+  ],
+  "properties": {
+    "problem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary", "inferred"],
+      "properties": {
+        "summary": { "type": "string", "minLength": 1 },
+        "inferred": { "type": "boolean" }
+      }
+    },
+    "topic": { "type": "string", "minLength": 1 },
+    "sentiment": {
+      "type": "string",
+      "enum": ["NEGATIVE", "MIXED", "NEUTRAL", "POSITIVE"]
+    },
+    "evidenceReferences": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "opportunityType": {
+      "type": "string",
+      "enum": ["PRODUCT", "BUILDER", "NONE"]
+    },
+    "productMatch": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "productId",
+            "productName",
+            "matchType",
+            "matchedCapabilities"
+          ],
+          "properties": {
+            "productId": { "type": "string", "format": "uuid" },
+            "productName": { "type": "string", "minLength": 1 },
+            "matchType": {
+              "type": "string",
+              "enum": ["DIRECT", "ADJACENT", "SMALL_EXTENSION"]
+            },
+            "matchedCapabilities": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        { "type": "null" }
+      ]
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "explanation": { "type": "string", "minLength": 1 },
+    "suggestedAction": { "type": "string", "minLength": 1 },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+  }
+}
