@@ -96,6 +96,11 @@ type Opportunity = {
   matchedProductId: string | null
   matchedProductName: string | null
   matchedCapabilities: string[]
+  builderSubtype: string | null
+  matchedSkills: string[]
+  advancedGoals: string[]
+  effortEstimate: string | null
+  nextSteps: string[]
   limitations: string[]
   evidenceReferences: string[]
   explanation: string
@@ -149,6 +154,26 @@ type OpportunityDetail = {
   source: SourceDiscussion
   relevantComments: SourceComment[]
   campaigns: CampaignLink[]
+  activity: OpportunityActivity
+}
+
+type BuilderDecision = {
+  id: string
+  decisionType: 'saved' | 'dismissed' | 'pursued'
+  reason: string | null
+  occurredAt: string
+}
+
+type Outcome = {
+  id: string
+  outcomeType: string
+  note: string | null
+  occurredAt: string
+}
+
+type OpportunityActivity = {
+  decisions: BuilderDecision[]
+  outcomes: Outcome[]
 }
 
 type CreateCampaignLinkResponse = {
@@ -221,6 +246,8 @@ function App() {
     null,
   )
   const [isCreatingCampaign, setIsCreatingCampaign] = useState(false)
+  const [activityNote, setActivityNote] = useState('')
+  const [outcomeType, setOutcomeType] = useState('learningValue')
 
   useEffect(() => {
     const controller = new AbortController()
@@ -614,6 +641,57 @@ function App() {
     } finally {
       setIsCreatingCampaign(false)
     }
+  }
+
+  async function recordDecision(decisionType: BuilderDecision['decisionType']) {
+    if (!selectedOpportunity) return
+    const response = await fetch(
+      `${apiBaseUrl}/api/opportunities/${selectedOpportunity.opportunity.id}/decisions`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ decisionType, reason: activityNote || null }),
+      },
+    )
+    if (!response.ok) {
+      setOpportunityError(await readApiError(response))
+      return
+    }
+    const decision = (await response.json()) as BuilderDecision
+    setSelectedOpportunity({
+      ...selectedOpportunity,
+      activity: {
+        ...selectedOpportunity.activity,
+        decisions: [decision, ...selectedOpportunity.activity.decisions],
+      },
+    })
+    setActivityNote('')
+  }
+
+  async function recordOutcome(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!selectedOpportunity) return
+    const response = await fetch(
+      `${apiBaseUrl}/api/opportunities/${selectedOpportunity.opportunity.id}/outcomes`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ outcomeType, note: activityNote || null }),
+      },
+    )
+    if (!response.ok) {
+      setOpportunityError(await readApiError(response))
+      return
+    }
+    const outcome = (await response.json()) as Outcome
+    setSelectedOpportunity({
+      ...selectedOpportunity,
+      activity: {
+        ...selectedOpportunity.activity,
+        outcomes: [outcome, ...selectedOpportunity.activity.outcomes],
+      },
+    })
+    setActivityNote('')
   }
 
   return (
@@ -1108,6 +1186,29 @@ function App() {
                   </div>
                 )}
 
+                {selectedOpportunity.opportunity.builderSubtype && (
+                  <div className="product-match">
+                    <strong>
+                      {selectedOpportunity.opportunity.builderSubtype
+                        .replace(/([A-Z])/g, ' $1')}
+                    </strong>
+                    <span>
+                      Skills: {selectedOpportunity.opportunity.matchedSkills.join(', ')}
+                    </span>
+                    <span>
+                      Advances: {selectedOpportunity.opportunity.advancedGoals.join(', ')}
+                    </span>
+                    <span>
+                      Effort: {selectedOpportunity.opportunity.effortEstimate}
+                    </span>
+                    <ul>
+                      {selectedOpportunity.opportunity.nextSteps.map((step) => (
+                        <li key={step}>{step}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
                 <div>
                   <strong>Relevant source comments</strong>
                   <div className="report-comments">
@@ -1161,6 +1262,58 @@ function App() {
                   <strong>Suggested action:</strong>{' '}
                   {selectedOpportunity.opportunity.suggestedAction}
                 </p>
+
+                <section className="activity-panel">
+                  <strong>Decision and outcome timeline</strong>
+                  <label>
+                    Optional reason or note
+                    <input
+                      value={activityNote}
+                      onChange={(event) => setActivityNote(event.target.value)}
+                    />
+                  </label>
+                  <div className="actions">
+                    {(['saved', 'dismissed', 'pursued'] as const).map((action) => (
+                      <button type="button" className="secondary"
+                        onClick={() => recordDecision(action)} key={action}>
+                        {action}
+                      </button>
+                    ))}
+                  </div>
+                  <form className="actions" onSubmit={recordOutcome}>
+                    <select value={outcomeType}
+                      onChange={(event) => setOutcomeType(event.target.value)}>
+                      <option value="activation">Activation</option>
+                      <option value="purchase">Purchase</option>
+                      <option value="learningValue">Learning value</option>
+                      <option value="prototypeCompleted">Prototype completed</option>
+                      <option value="portfolio">Portfolio</option>
+                      <option value="collaboration">Collaboration</option>
+                      <option value="interview">Interview</option>
+                      <option value="contract">Contract</option>
+                    </select>
+                    <button type="submit">Record outcome</button>
+                  </form>
+                  <ul className="activity-timeline">
+                    {[
+                      ...selectedOpportunity.activity.decisions.map((item) => ({
+                        id: item.id, label: item.decisionType, note: item.reason,
+                        occurredAt: item.occurredAt,
+                      })),
+                      ...selectedOpportunity.activity.outcomes.map((item) => ({
+                        id: item.id, label: item.outcomeType, note: item.note,
+                        occurredAt: item.occurredAt,
+                      })),
+                    ].sort((a, b) => b.occurredAt.localeCompare(a.occurredAt))
+                      .map((item) => (
+                        <li key={item.id}>
+                          <strong>{item.label.replace(/([A-Z])/g, ' $1')}</strong>
+                          {item.note && ` — ${item.note}`} ·{' '}
+                          {new Date(item.occurredAt).toLocaleString()}
+                        </li>
+                      ))}
+                  </ul>
+                </section>
 
                 <section className="campaign-panel">
                   <div>

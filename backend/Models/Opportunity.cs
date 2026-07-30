@@ -24,6 +24,16 @@ public sealed class Opportunity
 
     public required IReadOnlyList<string> MatchedCapabilities { get; init; }
 
+    public BuilderOpportunitySubtype? BuilderSubtype { get; init; }
+
+    public IReadOnlyList<string> MatchedSkills { get; init; } = [];
+
+    public IReadOnlyList<string> AdvancedGoals { get; init; } = [];
+
+    public string? EffortEstimate { get; init; }
+
+    public IReadOnlyList<string> NextSteps { get; init; } = [];
+
     public required IReadOnlyList<string> Limitations { get; init; }
 
     public required IReadOnlyList<string> EvidenceReferences { get; init; }

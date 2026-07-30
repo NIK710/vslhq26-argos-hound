@@ -24,6 +24,12 @@ public sealed class OpportunityEntity
 
     public required string MatchedCapabilitiesJson { get; set; }
 
+    public string? BuilderSubtype { get; set; }
+    public string MatchedSkillsJson { get; set; } = "[]";
+    public string AdvancedGoalsJson { get; set; } = "[]";
+    public string? EffortEstimate { get; set; }
+    public string NextStepsJson { get; set; } = "[]";
+
     public required string LimitationsJson { get; set; }
 
     public required string Explanation { get; set; }
@@ -41,4 +47,6 @@ public sealed class OpportunityEntity
     public List<OpportunityEvidenceEntity> EvidenceReferences { get; set; } = [];
 
     public List<CampaignLinkEntity> CampaignLinks { get; set; } = [];
+    public List<BuilderDecisionEntity> Decisions { get; set; } = [];
+    public List<OutcomeEntity> Outcomes { get; set; } = [];
 }

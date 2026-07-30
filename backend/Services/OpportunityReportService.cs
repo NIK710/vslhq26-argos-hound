@@ -5,7 +5,8 @@ namespace ArgosHound.Api.Services;
 
 public sealed class OpportunityReportService(
     ISourceDiscussionService sourceDiscussionService,
-    ICampaignRepository campaignRepository)
+    ICampaignRepository campaignRepository,
+    OpportunityActivityService activityService)
     : IOpportunityReportService
 {
     public async Task<OpportunityDetailResponse> BuildAsync(
@@ -25,6 +26,7 @@ public sealed class OpportunityReportService(
             relevantComments,
             await campaignRepository.GetForOpportunityAsync(
                 opportunity.Id,
-                cancellationToken));
+                cancellationToken),
+            (await activityService.GetAsync(opportunity.Id, cancellationToken))!);
     }
 }

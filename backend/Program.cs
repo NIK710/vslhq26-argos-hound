@@ -95,6 +95,7 @@ builder.Services.AddSingleton<IOpportunityScoringService, OpportunityScoringServ
 builder.Services.AddScoped<IOpportunityRepository, OpportunityRepository>();
 builder.Services.AddScoped<IDiscoveryService, DiscoveryService>();
 builder.Services.AddScoped<IOpportunityReportService, OpportunityReportService>();
+builder.Services.AddScoped<OpportunityActivityService>();
 builder.Services.AddSingleton<ICampaignCodeService, CampaignCodeService>();
 builder.Services.AddScoped<ICampaignRepository, CampaignRepository>();
 builder.Services.AddScoped<ICampaignLinkService, CampaignLinkService>();

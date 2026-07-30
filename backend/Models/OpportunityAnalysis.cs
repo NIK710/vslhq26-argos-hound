@@ -14,6 +14,8 @@ public sealed class OpportunityAnalysis
 
     public ProductMatchAnalysis? ProductMatch { get; init; }
 
+    public BuilderMatchAnalysis? BuilderMatch { get; init; }
+
     public required IReadOnlyList<string> Limitations { get; init; }
 
     public required string Explanation { get; init; }

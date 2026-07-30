@@ -73,6 +73,11 @@ public sealed class OpportunityRepository(
             MatchedCapabilitiesJson = JsonSerializer.Serialize(
                 opportunity.MatchedCapabilities,
                 JsonOptions),
+            BuilderSubtype = opportunity.BuilderSubtype?.ToString(),
+            MatchedSkillsJson = JsonSerializer.Serialize(opportunity.MatchedSkills, JsonOptions),
+            AdvancedGoalsJson = JsonSerializer.Serialize(opportunity.AdvancedGoals, JsonOptions),
+            EffortEstimate = opportunity.EffortEstimate,
+            NextStepsJson = JsonSerializer.Serialize(opportunity.NextSteps, JsonOptions),
             LimitationsJson = JsonSerializer.Serialize(
                 opportunity.Limitations,
                 JsonOptions),
@@ -110,6 +115,13 @@ public sealed class OpportunityRepository(
             MatchedProductId = entity.MatchedProductId,
             MatchedProductName = entity.MatchedProductName,
             MatchedCapabilities = DeserializeList(entity.MatchedCapabilitiesJson),
+            BuilderSubtype = entity.BuilderSubtype is null
+                ? null
+                : Enum.Parse<BuilderOpportunitySubtype>(entity.BuilderSubtype),
+            MatchedSkills = DeserializeList(entity.MatchedSkillsJson),
+            AdvancedGoals = DeserializeList(entity.AdvancedGoalsJson),
+            EffortEstimate = entity.EffortEstimate,
+            NextSteps = DeserializeList(entity.NextStepsJson),
             Limitations = DeserializeList(entity.LimitationsJson),
             EvidenceReferences = entity.EvidenceReferences
                 .OrderBy(item => item.ExternalId, StringComparer.Ordinal)

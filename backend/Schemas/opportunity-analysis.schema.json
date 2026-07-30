@@ -9,6 +9,7 @@
     "evidenceReferences",
     "opportunityType",
     "productMatch",
+    "builderMatch",
     "limitations",
     "explanation",
     "suggestedAction",
@@ -60,6 +61,35 @@
               "type": "array",
               "minItems": 1,
               "uniqueItems": true,
+              "items": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        { "type": "null" }
+      ]
+    },
+    "builderMatch": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["subtype", "matchedSkills", "advancedGoals", "effortEstimate", "nextSteps"],
+          "properties": {
+            "subtype": {
+              "type": "string",
+              "enum": ["FREELANCE", "PORTFOLIO_PROJECT", "OPEN_SOURCE", "COLLABORATION", "COMMUNITY_SERVICE", "RESEARCH", "PRODUCT_EXPLORATION"]
+            },
+            "matchedSkills": {
+              "type": "array", "minItems": 1, "uniqueItems": true,
+              "items": { "type": "string", "minLength": 1 }
+            },
+            "advancedGoals": {
+              "type": "array", "minItems": 1, "uniqueItems": true,
+              "items": { "type": "string", "minLength": 1 }
+            },
+            "effortEstimate": { "type": "string", "minLength": 1 },
+            "nextSteps": {
+              "type": "array", "minItems": 2, "uniqueItems": true,
               "items": { "type": "string", "minLength": 1 }
             }
           }

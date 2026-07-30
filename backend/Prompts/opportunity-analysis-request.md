@@ -27,7 +27,11 @@ Rules:
   BUILDER when the work fits the supplied skills, goals, interests, and constraints.
 - For BUILDER, explain the exact supplied skills or learning goals that make the
   opportunity personally relevant.
-- For BUILDER and NONE, productMatch must be null.
+- For BUILDER, builderMatch is required. Use exact supplied skill and learning-goal
+  strings, estimate effort, choose a subtype, and offer at least two safe next steps
+  (for example investigate, interview, or prototype).
+- For PRODUCT and NONE, builderMatch must be null. For BUILDER and NONE, productMatch
+  must be null.
 - Return at least one honest limitation.
 - Return NONE when personalized fit or problem evidence is weak.
 - Return JSON only, without Markdown fences or text outside the object.

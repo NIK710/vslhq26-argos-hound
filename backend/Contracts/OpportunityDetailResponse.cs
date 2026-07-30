@@ -6,4 +6,5 @@ public sealed record OpportunityDetailResponse(
     Opportunity Opportunity,
     SourceDiscussion Source,
     IReadOnlyList<SourceComment> RelevantComments,
-    IReadOnlyList<CampaignLink> Campaigns);
+    IReadOnlyList<CampaignLink> Campaigns,
+    OpportunityActivityResponse Activity);

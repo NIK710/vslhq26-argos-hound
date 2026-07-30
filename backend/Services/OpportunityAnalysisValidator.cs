@@ -83,13 +83,35 @@ public sealed class OpportunityAnalysisValidator
         if (analysis.OpportunityType == OpportunityType.Product)
         {
             ValidateProductMatch(analysis.ProductMatch, context.Products);
+            if (analysis.BuilderMatch is not null) Reject("builderMatch must be null for PRODUCT.");
         }
-        else if (analysis.ProductMatch is not null)
+        else if (analysis.OpportunityType == OpportunityType.Builder)
         {
-            Reject("productMatch must be null for BUILDER and NONE.");
+            if (analysis.ProductMatch is not null) Reject("productMatch must be null for BUILDER.");
+            ValidateBuilderMatch(analysis.BuilderMatch, context.Builder);
+        }
+        else if (analysis.ProductMatch is not null || analysis.BuilderMatch is not null)
+        {
+            Reject("productMatch and builderMatch must be null for NONE.");
         }
 
         return analysis;
+    }
+
+    private static void ValidateBuilderMatch(
+        BuilderMatchAnalysis? match,
+        BuilderProfile builder)
+    {
+        if (match is null) Reject("BUILDER opportunities require builderMatch.");
+        ValidateNonEmptyTextList(match.MatchedSkills, "builderMatch.matchedSkills");
+        ValidateNonEmptyTextList(match.AdvancedGoals, "builderMatch.advancedGoals");
+        ValidateNonEmptyTextList(match.NextSteps, "builderMatch.nextSteps");
+        ValidateRequiredText(match.EffortEstimate, "builderMatch.effortEstimate");
+        if (match.NextSteps.Count < 2) Reject("builderMatch.nextSteps must contain multiple options.");
+        if (match.MatchedSkills.Any(skill => !builder.CurrentSkills.Contains(skill, StringComparer.Ordinal)))
+            Reject("builderMatch contains an unknown current skill.");
+        if (match.AdvancedGoals.Any(goal => !builder.LearningGoals.Contains(goal, StringComparer.Ordinal)))
+            Reject("builderMatch contains an unknown learning goal.");
     }
 
     private static void ValidateProductMatch(

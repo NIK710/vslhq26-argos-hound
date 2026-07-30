@@ -47,6 +47,11 @@ public sealed class DiscoveryService(
             MatchedProductName = analysis.ProductMatch?.ProductName,
             MatchedCapabilities =
                 analysis.ProductMatch?.MatchedCapabilities ?? [],
+            BuilderSubtype = analysis.BuilderMatch?.Subtype,
+            MatchedSkills = analysis.BuilderMatch?.MatchedSkills ?? [],
+            AdvancedGoals = analysis.BuilderMatch?.AdvancedGoals ?? [],
+            EffortEstimate = analysis.BuilderMatch?.EffortEstimate,
+            NextSteps = analysis.BuilderMatch?.NextSteps ?? [],
             Limitations = analysis.Limitations,
             EvidenceReferences = analysis.EvidenceReferences,
             Explanation = analysis.Explanation,

@@ -14,6 +14,8 @@ public sealed class ArgosHoundDbContext(
 
     public DbSet<EngagementEventEntity> EngagementEvents =>
         Set<EngagementEventEntity>();
+    public DbSet<BuilderDecisionEntity> BuilderDecisions => Set<BuilderDecisionEntity>();
+    public DbSet<OutcomeEntity> Outcomes => Set<OutcomeEntity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -23,6 +25,7 @@ public sealed class ArgosHoundDbContext(
             entity.HasIndex(item => item.DiscussionId).IsUnique();
             entity.Property(item => item.Type).HasMaxLength(32);
             entity.Property(item => item.ProductMatchType).HasMaxLength(32);
+            entity.Property(item => item.BuilderSubtype).HasMaxLength(32);
             entity.Property(item => item.Sentiment).HasMaxLength(32);
             entity.Property(item => item.Confidence).HasPrecision(5, 4);
             entity.HasMany(item => item.EvidenceReferences)
@@ -33,6 +36,19 @@ public sealed class ArgosHoundDbContext(
                 .WithOne(item => item.Opportunity)
                 .HasForeignKey(item => item.OpportunityId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<BuilderDecisionEntity>(entity =>
+        {
+            entity.HasKey(item => item.Id);
+            entity.HasIndex(item => new { item.OpportunityId, item.OccurredAt });
+            entity.Property(item => item.DecisionType).HasMaxLength(32);
+        });
+        modelBuilder.Entity<OutcomeEntity>(entity =>
+        {
+            entity.HasKey(item => item.Id);
+            entity.HasIndex(item => new { item.OpportunityId, item.OccurredAt });
+            entity.Property(item => item.OutcomeType).HasMaxLength(32);
         });
 
         modelBuilder.Entity<OpportunityEvidenceEntity>(entity =>

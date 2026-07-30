@@ -127,25 +127,25 @@ stable IDs and URLs.
 
 ### 8. Builder-opportunity flow
 
-- [ ] Match the chess-club fixture against skills, goals, interests, and location
-- [ ] Return a builder-opportunity subtype
-- [ ] Explain why the builder can help
-- [ ] Explain how the opportunity advances a learning or career goal
-- [ ] Estimate effort and identify limitations
-- [ ] Suggest multiple safe next steps, such as investigate, interview, or prototype
-- [ ] Persist and render the `BUILDER` opportunity
-- [ ] Verify the unrelated fixture returns `NONE`
+- [x] Match the chess-club fixture against skills, goals, interests, and location
+- [x] Return a builder-opportunity subtype
+- [x] Explain why the builder can help
+- [x] Explain how the opportunity advances a learning or career goal
+- [x] Estimate effort and identify limitations
+- [x] Suggest multiple safe next steps, such as investigate, interview, or prototype
+- [x] Persist and render the `BUILDER` opportunity
+- [x] Verify the unrelated fixture returns `NONE`
 
 ### 9. Decisions and outcomes
 
-- [ ] Define `BuilderDecision`
-- [ ] Define `Outcome`
-- [ ] Implement save, dismiss, and pursue actions
-- [ ] Allow an optional decision reason
-- [ ] Record product outcomes such as activation or purchase
-- [ ] Record builder outcomes such as learning value or prototype completed
-- [ ] Add portfolio, collaboration, interview, and contract outcome types
-- [ ] Display the event and outcome timeline
+- [x] Define `BuilderDecision`
+- [x] Define `Outcome`
+- [x] Implement save, dismiss, and pursue actions
+- [x] Allow an optional decision reason
+- [x] Record product outcomes such as activation or purchase
+- [x] Record builder outcomes such as learning value or prototype completed
+- [x] Add portfolio, collaboration, interview, and contract outcome types
+- [x] Display the event and outcome timeline
 
 ### 10. Transparent learning
 
