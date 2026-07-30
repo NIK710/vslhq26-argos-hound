@@ -39,23 +39,23 @@ The MVP includes:
 ## Architecture
 
 ```text
-                         +----------------------+
-                         | Public source        |
-                         | Seeded discussions   |
-                         +----------+-----------+
+                         +--------------------------+
+                         | Public source            |
+                         | (Reddit, YouTube, etc)   |
+                         +----------+---------------+
                                     |
                                     v
-+---------+      +---------------------------------------------+
-| React   |<---->| ASP.NET Core API                            |
-| UI      |      |                                             |
-+---------+      | Source | Discovery | Scoring | Attribution  |
++---------+      +----------------------------------------------+
+| React   |<---->| ASP.NET Core API                             |
+| UI      |      |                                              |
++---------+      | Source | Discovery | Scoring | Attribution   |
                  | Decisions | Outcomes | Learning | Validation |
-                 +-----------+----------------------+----------+
+                 +-----------+----------------------+-----------+
                              |                      |
                              v                      v
                  +----------------------+   +---------------+
-                 | Local demo provider  |   | SQLite        |
-                 | or Foundry agent     |   | opportunities |
+                 |                      |   | SQLite        |
+                 | Foundry agent        |   | opportunities |
                  | + Azure OpenAI       |   | and events    |
                  +----------------------+   +---------------+
 ```
