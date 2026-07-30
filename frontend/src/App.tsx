@@ -226,6 +226,12 @@ async function readApiError(response: Response) {
 const wait = (milliseconds: number) =>
   new Promise((resolve) => window.setTimeout(resolve, milliseconds))
 
+function opportunityLabel(type: 'product' | 'builder' | 'none') {
+  if (type === 'product') return 'Potential user'
+  if (type === 'builder') return 'Builder opportunity'
+  return 'No opportunity'
+}
+
 function App() {
   const [provider, setProvider] =
     useState<ProfileImport['provider']>('chatGpt')
@@ -737,7 +743,7 @@ function App() {
       <h1>Opportunity intelligence for builders</h1>
       <p className="intro">
         ArgosHound turns evidence from public discussions into explainable
-        product and project opportunities tailored to one builder.
+        potential users and project opportunities tailored to one builder.
       </p>
 
       <section className="builder-summary">
@@ -1042,7 +1048,9 @@ function App() {
                       <span
                         className={`opportunity-badge opportunity-badge--${analysisResult.analysis.opportunityType}`}
                       >
-                        {analysisResult.analysis.opportunityType}
+                        {opportunityLabel(
+                          analysisResult.analysis.opportunityType,
+                        )}
                       </span>
                       <span>
                         {Math.round(analysisResult.analysis.confidence * 100)}%
@@ -1167,7 +1175,11 @@ function App() {
               }}
               key={filter}
             >
-              {filter}
+              {filter === 'product'
+                ? 'Potential users'
+                : filter === 'builder'
+                  ? 'Builder opportunities'
+                  : 'All'}
             </button>
           ))}
         </div>
@@ -1191,7 +1203,11 @@ function App() {
 
         {!opportunitiesLoading && opportunities.length > 0
           && filteredOpportunities.length === 0 && (
-            <p className="source-state">No {opportunityFilter} opportunities yet.</p>
+            <p className="source-state">
+              No {opportunityFilter === 'product'
+                ? 'potential users'
+                : 'builder opportunities'} yet.
+            </p>
           )}
 
         {filteredOpportunities.length > 0 && (
@@ -1208,7 +1224,7 @@ function App() {
                   onClick={() => selectOpportunity(opportunity.id)}
                   key={opportunity.id}
                 >
-                  <span>{opportunity.type}</span>
+                  <span>{opportunityLabel(opportunity.type)}</span>
                   <strong>{opportunity.topic}</strong>
                   <p>{opportunity.problem}</p>
                   <small>Score {opportunity.score}/100</small>
@@ -1223,7 +1239,7 @@ function App() {
                   <span
                     className={`opportunity-badge opportunity-badge--${selectedOpportunity.opportunity.type}`}
                   >
-                    {selectedOpportunity.opportunity.type}
+                    {opportunityLabel(selectedOpportunity.opportunity.type)}
                   </span>
                   <strong>
                     Score {selectedOpportunity.opportunity.score}/100
