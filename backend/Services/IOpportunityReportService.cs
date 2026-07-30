@@ -5,5 +5,7 @@ namespace ArgosHound.Api.Services;
 
 public interface IOpportunityReportService
 {
-    OpportunityDetailResponse Build(Opportunity opportunity);
+    Task<OpportunityDetailResponse> BuildAsync(
+        Opportunity opportunity,
+        CancellationToken cancellationToken = default);
 }

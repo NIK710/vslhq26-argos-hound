@@ -105,15 +105,15 @@ stable IDs and URLs.
 
 ### 7. Campaign attribution
 
-- [ ] Define `CampaignLink` and `EngagementEvent`
-- [ ] Generate a cryptographically random opportunity-scoped code
-- [ ] Store the code safely
-- [ ] Allow only configured destination hosts
-- [ ] Implement `GET /r/{code}`
-- [ ] Record an `OPENED` event and redirect
-- [ ] Display campaign events on the opportunity detail page
-- [ ] Add a measurement disclosure to the demo destination page
-- [ ] Confirm the code identifies the campaign, not a source commenter
+- [x] Define `CampaignLink` and `EngagementEvent`
+- [x] Generate a cryptographically random opportunity-scoped code
+- [x] Store the code safely
+- [x] Allow only configured destination hosts
+- [x] Implement `GET /r/{code}`
+- [x] Record an `OPENED` event and redirect
+- [x] Display campaign events on the opportunity detail page
+- [x] Add a measurement disclosure to the demo destination page
+- [x] Confirm the code identifies the campaign, not a source commenter
 
 ### Day 1 exit criteria
 

@@ -26,7 +26,9 @@ public sealed class DiscoveryController(
             var opportunity = await discoveryService.DiscoverAsync(
                 request.DiscussionId,
                 cancellationToken);
-            var report = reportService.Build(opportunity);
+            var report = await reportService.BuildAsync(
+                opportunity,
+                cancellationToken);
 
             return Created($"/api/opportunities/{opportunity.Id}", report);
         }

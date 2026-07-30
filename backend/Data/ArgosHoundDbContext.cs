@@ -10,6 +10,11 @@ public sealed class ArgosHoundDbContext(
     public DbSet<OpportunityEvidenceEntity> OpportunityEvidence =>
         Set<OpportunityEvidenceEntity>();
 
+    public DbSet<CampaignLinkEntity> CampaignLinks => Set<CampaignLinkEntity>();
+
+    public DbSet<EngagementEventEntity> EngagementEvents =>
+        Set<EngagementEventEntity>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<OpportunityEntity>(entity =>
@@ -24,6 +29,10 @@ public sealed class ArgosHoundDbContext(
                 .WithOne(item => item.Opportunity)
                 .HasForeignKey(item => item.OpportunityId)
                 .OnDelete(DeleteBehavior.Cascade);
+            entity.HasMany(item => item.CampaignLinks)
+                .WithOne(item => item.Opportunity)
+                .HasForeignKey(item => item.OpportunityId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<OpportunityEvidenceEntity>(entity =>
@@ -32,6 +41,27 @@ public sealed class ArgosHoundDbContext(
             entity.Property(item => item.ExternalId).HasMaxLength(200);
             entity.HasIndex(item => new { item.OpportunityId, item.ExternalId })
                 .IsUnique();
+        });
+
+        modelBuilder.Entity<CampaignLinkEntity>(entity =>
+        {
+            entity.HasKey(item => item.Id);
+            entity.HasIndex(item => item.CodeHash).IsUnique();
+            entity.HasIndex(item => item.OpportunityId);
+            entity.Property(item => item.CodeHash).HasMaxLength(64);
+            entity.Property(item => item.DestinationUrl).HasMaxLength(2_000);
+            entity.Property(item => item.Purpose).HasMaxLength(32);
+            entity.HasMany(item => item.Events)
+                .WithOne(item => item.CampaignLink)
+                .HasForeignKey(item => item.CampaignLinkId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<EngagementEventEntity>(entity =>
+        {
+            entity.HasKey(item => item.Id);
+            entity.HasIndex(item => new { item.CampaignLinkId, item.OccurredAt });
+            entity.Property(item => item.EventType).HasMaxLength(32);
         });
     }
 }

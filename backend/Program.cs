@@ -53,6 +53,26 @@ builder.Services
     .ValidateOnStart();
 
 builder.Services
+    .AddOptions<CampaignOptions>()
+    .Bind(builder.Configuration.GetSection(CampaignOptions.SectionName))
+    .Validate(
+        options =>
+            Uri.TryCreate(
+                options.PublicBaseUrl,
+                UriKind.Absolute,
+                out var publicBaseUrl)
+            && (publicBaseUrl.Scheme == Uri.UriSchemeHttps
+                || publicBaseUrl.Scheme == Uri.UriSchemeHttp),
+        "Campaign:PublicBaseUrl must be an absolute HTTP or HTTPS URL.")
+    .Validate(
+        options =>
+            options.AllowedDestinationHosts.Count > 0
+            && options.AllowedDestinationHosts.All(
+                host => Uri.CheckHostName(host) != UriHostNameType.Unknown),
+        "Campaign:AllowedDestinationHosts must contain valid host names.")
+    .ValidateOnStart();
+
+builder.Services
     .AddControllers()
     .AddJsonOptions(options =>
     {
@@ -75,6 +95,9 @@ builder.Services.AddSingleton<IOpportunityScoringService, OpportunityScoringServ
 builder.Services.AddScoped<IOpportunityRepository, OpportunityRepository>();
 builder.Services.AddScoped<IDiscoveryService, DiscoveryService>();
 builder.Services.AddScoped<IOpportunityReportService, OpportunityReportService>();
+builder.Services.AddSingleton<ICampaignCodeService, CampaignCodeService>();
+builder.Services.AddScoped<ICampaignRepository, CampaignRepository>();
+builder.Services.AddScoped<ICampaignLinkService, CampaignLinkService>();
 builder.Services.AddSingleton<
     IFoundryAgentConnectivityService,
     FoundryAgentConnectivityService>();
@@ -114,7 +137,7 @@ using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider
         .GetRequiredService<ArgosHoundDbContext>();
-    dbContext.Database.EnsureCreated();
+    ArgosHoundDatabaseInitializer.Initialize(dbContext);
 }
 
 app.UseCors(frontendCorsPolicy);

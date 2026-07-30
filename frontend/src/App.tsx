@@ -106,6 +106,30 @@ type Opportunity = {
   createdAt: string
 }
 
+type EngagementEvent = {
+  id: string
+  campaignLinkId: string
+  eventType:
+    | 'opened'
+    | 'explored'
+    | 'signedUp'
+    | 'activated'
+    | 'contacted'
+    | 'converted'
+  occurredAt: string
+  metadata: Record<string, string>
+}
+
+type CampaignLink = {
+  id: string
+  opportunityId: string
+  destinationUrl: string
+  purpose: 'product' | 'portfolio' | 'project'
+  createdAt: string
+  expiresAt: string | null
+  events: EngagementEvent[]
+}
+
 type OpportunitySummary = Pick<
   Opportunity,
   | 'id'
@@ -124,6 +148,12 @@ type OpportunityDetail = {
   opportunity: Opportunity
   source: SourceDiscussion
   relevantComments: SourceComment[]
+  campaigns: CampaignLink[]
+}
+
+type CreateCampaignLinkResponse = {
+  campaign: CampaignLink
+  redirectUrl: string
 }
 
 type BackendStatus =
@@ -182,6 +212,15 @@ function App() {
   const [opportunityError, setOpportunityError] = useState<string | null>(null)
   const [opportunitiesLoading, setOpportunitiesLoading] = useState(true)
   const [isDiscovering, setIsDiscovering] = useState(false)
+  const [campaignDestination, setCampaignDestination] = useState(
+    `${apiBaseUrl}/demo/destination`,
+  )
+  const [campaignPurpose, setCampaignPurpose] =
+    useState<CampaignLink['purpose']>('product')
+  const [latestCampaignUrl, setLatestCampaignUrl] = useState<string | null>(
+    null,
+  )
+  const [isCreatingCampaign, setIsCreatingCampaign] = useState(false)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -514,6 +553,7 @@ function App() {
 
   async function selectOpportunity(id: string) {
     setOpportunityError(null)
+    setLatestCampaignUrl(null)
 
     try {
       const response = await fetch(`${apiBaseUrl}/api/opportunities/${id}`)
@@ -528,6 +568,51 @@ function App() {
           ? error.message
           : 'Unable to load the opportunity report',
       )
+    }
+  }
+
+  async function createCampaignLink(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!selectedOpportunity) return
+
+    setOpportunityError(null)
+    setLatestCampaignUrl(null)
+    setIsCreatingCampaign(true)
+
+    try {
+      const response = await fetch(
+        `${apiBaseUrl}/api/opportunities/${selectedOpportunity.opportunity.id}/campaign-links`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            destinationUrl: campaignDestination,
+            purpose: campaignPurpose,
+          }),
+        },
+      )
+
+      if (!response.ok) {
+        throw new Error(await readApiError(response))
+      }
+
+      const created = (await response.json()) as CreateCampaignLinkResponse
+      setLatestCampaignUrl(created.redirectUrl)
+      setSelectedOpportunity({
+        ...selectedOpportunity,
+        campaigns: [
+          created.campaign,
+          ...selectedOpportunity.campaigns,
+        ],
+      })
+    } catch (error) {
+      setOpportunityError(
+        error instanceof Error
+          ? error.message
+          : 'Unable to create the campaign link',
+      )
+    } finally {
+      setIsCreatingCampaign(false)
     }
   }
 
@@ -1076,6 +1161,124 @@ function App() {
                   <strong>Suggested action:</strong>{' '}
                   {selectedOpportunity.opportunity.suggestedAction}
                 </p>
+
+                <section className="campaign-panel">
+                  <div>
+                    <strong>Campaign attribution</strong>
+                    <p>
+                      The redirect records an <code>OPENED</code> event for this
+                      opportunity campaign. It does not identify or profile any
+                      source commenter.
+                    </p>
+                  </div>
+
+                  <form
+                    className="campaign-form"
+                    onSubmit={createCampaignLink}
+                  >
+                    <label>
+                      Purpose
+                      <select
+                        value={campaignPurpose}
+                        onChange={(event) =>
+                          setCampaignPurpose(
+                            event.target.value as CampaignLink['purpose'],
+                          )
+                        }
+                      >
+                        <option value="product">Product</option>
+                        <option value="portfolio">Portfolio</option>
+                        <option value="project">Project</option>
+                      </select>
+                    </label>
+                    <label>
+                      Allowlisted destination
+                      <input
+                        type="url"
+                        value={campaignDestination}
+                        onChange={(event) =>
+                          setCampaignDestination(event.target.value)
+                        }
+                        required
+                      />
+                    </label>
+                    <button type="submit" disabled={isCreatingCampaign}>
+                      {isCreatingCampaign
+                        ? 'Creating secure link…'
+                        : 'Create campaign link'}
+                    </button>
+                  </form>
+
+                  {latestCampaignUrl && (
+                    <div className="campaign-created" aria-live="polite">
+                      <strong>Copy this link now</strong>
+                      <p>
+                        Only a hash is stored, so ArgosHound cannot reconstruct
+                        this redirect URL after reload.
+                      </p>
+                      <input
+                        aria-label="New campaign redirect URL"
+                        value={latestCampaignUrl}
+                        readOnly
+                      />
+                      <a
+                        href={latestCampaignUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Open measured demo
+                      </a>
+                    </div>
+                  )}
+
+                  <div className="campaign-history">
+                    <div className="campaign-history__heading">
+                      <strong>Campaign events</strong>
+                      <button
+                        type="button"
+                        className="secondary"
+                        onClick={() =>
+                          selectOpportunity(
+                            selectedOpportunity.opportunity.id,
+                          )
+                        }
+                      >
+                        Refresh events
+                      </button>
+                    </div>
+
+                    {selectedOpportunity.campaigns.length === 0 && (
+                      <p>No campaign links created for this opportunity.</p>
+                    )}
+
+                    {selectedOpportunity.campaigns.map((campaign) => (
+                      <article className="campaign-record" key={campaign.id}>
+                        <div>
+                          <strong>{campaign.purpose}</strong>
+                          <span>{campaign.destinationUrl}</span>
+                        </div>
+                        <small>
+                          Created{' '}
+                          {new Date(campaign.createdAt).toLocaleString()}
+                        </small>
+                        {campaign.events.length === 0
+                          ? <p>No opens recorded.</p>
+                          : (
+                              <ul>
+                                {campaign.events.map((engagement) => (
+                                  <li key={engagement.id}>
+                                    {engagement.eventType} ·{' '}
+                                    {new Date(
+                                      engagement.occurredAt,
+                                    ).toLocaleString()}
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                      </article>
+                    ))}
+                  </div>
+                </section>
               </article>
             )}
           </div>

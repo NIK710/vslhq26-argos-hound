@@ -273,6 +273,13 @@ separate lead profile and must not be joined into cross-platform identities.
 Only a hash of the random code should be persisted when practical. The code represents
 an opportunity or campaign, not an individual source author.
 
+The MVP generates 32 random bytes and encodes them as a 43-character base64url code.
+Only its SHA-256 hash is stored. The raw redirect URL is shown once when the campaign is
+created and cannot be reconstructed from storage. Redirect destinations must match an
+exact configured host; non-local destinations require HTTPS. Successful redirects add
+an `OPENED` event with empty metadata and return `no-store` and `no-referrer` headers.
+No IP address, user agent, cookie, source handle, or commenter identifier is retained.
+
 ### EngagementEvent
 
 - `id`
@@ -318,11 +325,11 @@ POST /api/discovery
 
 GET  /api/opportunities
 GET  /api/opportunities/{id}
+POST /api/opportunities/{id}/campaign-links
+GET  /r/{code}
 POST /api/opportunities/{id}/decisions
 POST /api/opportunities/{id}/outcomes
 
-POST /api/opportunities/{id}/campaign-links
-GET  /r/{code}
 POST /api/events
 
 GET  /api/learning/summary

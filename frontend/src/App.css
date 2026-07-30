@@ -451,6 +451,81 @@ button.opportunity-list-item--selected {
   color: var(--text);
 }
 
+.campaign-panel {
+  display: grid;
+  gap: 18px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.campaign-panel p {
+  color: var(--text);
+  font-size: 13px;
+}
+
+.campaign-form {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.5fr) minmax(220px, 1.5fr);
+  gap: 12px;
+}
+
+.campaign-form button {
+  grid-column: 1 / -1;
+}
+
+.campaign-created {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid #86efac;
+  border-radius: 8px;
+  background: #f0fdf4;
+}
+
+.campaign-created a {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.campaign-history {
+  display: grid;
+  gap: 10px;
+}
+
+.campaign-history__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.campaign-record {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--social-bg);
+}
+
+.campaign-record div {
+  display: grid;
+  gap: 4px;
+}
+
+.campaign-record span {
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 12px;
+}
+
+.campaign-record strong {
+  text-transform: capitalize;
+}
+
+.campaign-record ul {
+  padding-left: 20px;
+}
+
 .comment-list {
   display: grid;
   gap: 12px;
@@ -511,6 +586,10 @@ button.opportunity-list-item--selected {
   }
 
   .opportunity-browser {
+    grid-template-columns: 1fr;
+  }
+
+  .campaign-form {
     grid-template-columns: 1fr;
   }
 }

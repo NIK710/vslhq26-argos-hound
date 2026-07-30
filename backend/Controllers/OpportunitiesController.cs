@@ -39,6 +39,8 @@ public sealed class OpportunitiesController(
             cancellationToken);
         return opportunity is null
             ? NotFound()
-            : Ok(reportService.Build(opportunity));
+            : Ok(await reportService.BuildAsync(
+                opportunity,
+                cancellationToken));
     }
 }

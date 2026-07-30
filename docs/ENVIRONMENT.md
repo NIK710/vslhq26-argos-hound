@@ -36,6 +36,9 @@ Current backend variables:
 | `Cors__AllowedOrigins__0` | No | First browser origin allowed by the CORS policy | `http://localhost:5173` |
 | `Cors__AllowedOrigins__1` | No | Optional additional allowed origin | `http://127.0.0.1:5173` |
 | `ConnectionStrings__ArgosHound` | No | SQLite application database | `Data Source=argoshound.db` |
+| `Campaign__PublicBaseUrl` | No | Trusted public base used to create redirect URLs | `http://localhost:5080` |
+| `Campaign__AllowedDestinationHosts__0` | No | First exact destination host permitted for redirects | `localhost` |
+| `Campaign__AllowedDestinationHosts__1` | No | Optional additional permitted destination host | `127.0.0.1` |
 
 Double underscores map environment variables to nested ASP.NET configuration. For
 example, `Cors__AllowedOrigins__0` maps to `Cors:AllowedOrigins:0`.
@@ -46,6 +49,10 @@ are introduced.
 
 The backend creates the MVP SQLite schema at startup. Local database files and their
 WAL/SHM sidecars are ignored by Git.
+
+Campaign hosts are exact host names, not URL patterns. Non-local destinations must use
+HTTPS. Configure `Campaign__PublicBaseUrl` from trusted deployment configuration; it is
+not derived from an incoming Host header.
 
 ## AI Configuration
 

@@ -39,4 +39,6 @@ public sealed class OpportunityEntity
     public DateTimeOffset CreatedAt { get; set; }
 
     public List<OpportunityEvidenceEntity> EvidenceReferences { get; set; } = [];
+
+    public List<CampaignLinkEntity> CampaignLinks { get; set; } = [];
 }

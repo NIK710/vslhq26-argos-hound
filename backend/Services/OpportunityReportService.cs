@@ -4,10 +4,13 @@ using ArgosHound.Api.Models;
 namespace ArgosHound.Api.Services;
 
 public sealed class OpportunityReportService(
-    ISourceDiscussionService sourceDiscussionService)
+    ISourceDiscussionService sourceDiscussionService,
+    ICampaignRepository campaignRepository)
     : IOpportunityReportService
 {
-    public OpportunityDetailResponse Build(Opportunity opportunity)
+    public async Task<OpportunityDetailResponse> BuildAsync(
+        Opportunity opportunity,
+        CancellationToken cancellationToken = default)
     {
         var source = sourceDiscussionService.Get(opportunity.DiscussionId);
         var evidenceIds = opportunity.EvidenceReferences.ToHashSet(
@@ -19,6 +22,9 @@ public sealed class OpportunityReportService(
         return new OpportunityDetailResponse(
             opportunity,
             source,
-            relevantComments);
+            relevantComments,
+            await campaignRepository.GetForOpportunityAsync(
+                opportunity.Id,
+                cancellationToken));
     }
 }
